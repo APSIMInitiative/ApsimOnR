@@ -11,7 +11,7 @@
 #'
 #' @export
 #'
-change_apsimx_param <- function(file_to_run, param_values) {
+change_apsimx_param <- function(exe, file_to_run, param_values) {
 
 
   # Generate config file containing parameter changes ---------------------------

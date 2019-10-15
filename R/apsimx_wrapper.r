@@ -83,7 +83,7 @@ apsimx_wrapper <- function( param_values=NULL, sit_var_dates_mask=NULL,
   # If any parameter value to change
   if ( ! is.null(param_values) ) {
     # Generate config file containing parameter changes ---------------------------
-    out <- change_apsimx_param(file_to_run, param_values)
+    out <- change_apsimx_param(exe, file_to_run, param_values)
 
     if (!out) {
       stop(paste("Error when changing parameters in", file_to_run))
