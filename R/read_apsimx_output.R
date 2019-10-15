@@ -1,3 +1,4 @@
+#' @export
 read_apsimx_output <- function(dbFileName, tableName, variables) {
   con <- DBI::dbConnect(RSQLite::SQLite(), dbFileName)
 

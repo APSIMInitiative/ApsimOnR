@@ -35,7 +35,7 @@
 #' @export
 #'
 apsimx_wrapper <- function( param_values=NULL, sit_var_dates_mask=NULL,
-                           prior_information=NULL, model_options ) {
+                            prior_information=NULL, model_options ) {
 
   # TODO : make a function dedicated to checking model_options
   # Because it may be model dependant, so it could be possible to pass anything
@@ -48,7 +48,7 @@ apsimx_wrapper <- function( param_values=NULL, sit_var_dates_mask=NULL,
   warning_display <- model_options$warning_display
   exe <- apsimx_path
   if (.Platform$OS.type == "unix") {
-	exe <- paste('mono', exe)
+    exe <- paste('mono', exe)
   }
 
   # Preliminary model checks ---------------------------------------------------
@@ -62,7 +62,7 @@ apsimx_wrapper <- function( param_values=NULL, sit_var_dates_mask=NULL,
     stop(paste("apsimx executable file doesn't exist !",apsimx_path))
   }
   if (!file.exists(apsimx_file)) {
-	stop(paste("apsimx file doesn't exist !", apsimx_file))
+    stop(paste("apsimx file doesn't exist !", apsimx_file))
   }
   val <- try(system(paste(exe,'/Version'),
                     intern = FALSE,
@@ -79,31 +79,46 @@ apsimx_wrapper <- function( param_values=NULL, sit_var_dates_mask=NULL,
   file_to_run <- tempfile('apsimOnR', fileext = '.apsimx')
   file.copy(apsimx_file, file_to_run)
 
-  # Generate config file containing parameter changes ---------------------------
-  config_file <- tempfile('apsimOnR', fileext = '.conf')
-  parameter_names <- names(param_values)
-  fileConn <- file(config_file)
-  lines <- vector("character", length(param_values))
-  for (i in 1:length(param_values))
-	lines[i] <- paste(parameter_names[i], '=', as.character(param_values[i]))
-  writeLines(lines, fileConn)
-  close(fileConn)
 
-  # Apply parameter changes to the model -----------------------------------------
-  cmd <- paste(exe, file_to_run, '/Edit', config_file)
-  edit_file_stdout <- shell(cmd, translate = FALSE, intern = TRUE, mustWork = TRUE)
-  #print(stdout)
+  # If any parameter value to change
+  if ( ! is.null(param_values) ) {
+    # Generate config file containing parameter changes ---------------------------
+    out <- change_apsimx_param(file_to_run, param_values)
+
+    if (!out) {
+      stop(paste("Error when changing parameters in", file_to_run))
+    }
+
+    # config_file <- tempfile('apsimOnR', fileext = '.conf')
+    # parameter_names <- names(param_values)
+    # fileConn <- file(config_file)
+    # lines <- vector("character", length(param_values))
+    # for (i in 1:length(param_values))
+    #   lines[i] <- paste(parameter_names[i], '=', as.character(param_values[i]))
+    # writeLines(lines, fileConn)
+    # close(fileConn)
+    #
+    # # Apply parameter changes to the model -----------------------------------------
+    # cmd <- paste(exe, file_to_run, '/Edit', config_file)
+    # #edit_file_stdout <- shell(cmd, translate = FALSE, intern = TRUE, mustWork = TRUE)
+    # edit_file_stdout <- system(cmd, intern = TRUE)
+
+    #print(stdout)
+  }
+
 
   # Run apsimx ------------------------------------------------------------------
   cmd <- paste(exe, file_to_run)
   if (model_options$multi_process)
-	cmd <- paste(cmd, '/MultiProcess')
+    cmd <- paste(cmd, '/MultiProcess')
 
   # run_file_stdout <- shell(cmd, translate = FALSE, intern = TRUE)
   # Portable version for system call
   run_file_stdout <- system(cmd,
                             ignore.stdout = TRUE,
                             ignore.stderr = TRUE)
+
+  # Getting the execution status
   flag_allsim <- !run_file_stdout
 
   # Store results ---------------------------------------------------------------
