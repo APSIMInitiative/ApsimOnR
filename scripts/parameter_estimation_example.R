@@ -14,8 +14,14 @@
  # Run the model before optimization for a prior evaluation
  apsimx_path=""
  apsimx_file=""
- model_options=apsim_wrapper_options(apsimx_path, apsimx_file)
- sim_before_optim=apsim_wrapper(model_options=model_options)
+ # define the variables list
+ variable_names=c()
+
+ model_options=apsimx_wrapper_options(apsimx_path,
+                                     apsimx_file,
+                                     variables_names = variables_names)
+
+ sim_before_optim=apsimx_wrapper(model_options=model_options)
 
  # Read and select the corresponding observations
  obs_list=read_obs_to_list(...)
