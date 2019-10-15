@@ -8,8 +8,7 @@
  # TEST ON ONE MODEL and ONE VARIABLE
 
  # Select the model
- #model_name=""
- model_id = ""
+ simulation_name = ""
  var_name=""
 
  # Run the model before optimization for a prior evaluation
@@ -20,7 +19,7 @@
 
  # Read and select the corresponding observations
  obs_list=read_obs_to_list(...)
- obs_list[[model_id]]=obs_list[[model_id]][,c("Date",var_name)]
+ obs_list[[simulation_name]]=obs_list[[simulation_name]][,c("Date",var_name)]
 
  # Set prior information on the parameters to estimate
  # TODO: adapt var1, var2 to variables names to use
@@ -47,12 +46,12 @@
  # Plot the results
  dev.new()
  par(mfrow = c(1,2))
- Ymax=max(max(obs_list[[model_id]][,var_name], na.rm=TRUE),
-          max(sim_before_optim$sim_list[[model_id]][,var_name], na.rm=TRUE))
- plot(sim_before_optim$sim_list[[model_id]][,c("Date",var_name)],type="l",
+ Ymax=max(max(obs_list[[simulation_name]][,var_name], na.rm=TRUE),
+          max(sim_before_optim$sim_list[[simulation_name]][,var_name], na.rm=TRUE))
+ plot(sim_before_optim$sim_list[[simulation_name]][,c("Date",var_name)],type="l",
       main="Before optimization",ylim=c(0,Ymax+Ymax*0.1))
- points(obs_list[[model_id]],col="green")
- plot(sim_after_optim$sim_list[[model_id]][,c("Date",var_name)],type="l",
+ points(obs_list[[simulation_name]],col="green")
+ plot(sim_after_optim$sim_list[[simulation_name]][,c("Date",var_name)],type="l",
       main="After optimization",ylim=c(0,Ymax+Ymax*0.1))
- points(obs_list[[model_id]],col="green")
+ points(obs_list[[simulation_name]],col="green")
 
