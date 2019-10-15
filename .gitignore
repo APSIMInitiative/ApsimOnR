@@ -2,3 +2,7 @@
 .Rhistory
 .RData
 .Ruserdata
+*.db
+*.db-shm
+*.db-wal
+*.apsimx.bak
