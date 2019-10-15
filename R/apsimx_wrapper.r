@@ -109,7 +109,9 @@ apsimx_wrapper <- function( param_values=NULL, sit_var_dates_mask=NULL,
   # Store results ---------------------------------------------------------------
   db_file_name <- gsub('.apsimx', '.db', file_to_run)
 
-  predicted_data <- read_apsimx_output(db_file_name, model_options$predicted_table_name, model_options$variable_names)
+  predicted_data <- read_apsimx_output(db_file_name,
+                                       model_options$predicted_table_name,
+                                       model_options$variable_names)
   #observed_data <- read_apsimx_output(db_file_name, model_options$observed_table_name, model_options$variable_names)
 
   # Display simulation duration -------------------------------------------------
@@ -122,96 +124,7 @@ apsimx_wrapper <- function( param_values=NULL, sit_var_dates_mask=NULL,
 
 }
 
-#' @title Getting a apsimx_wrapper options list with initialized fields
-#'
-#' @description This function returns a default options list
-#'
-#' @param apsimx_path Path of the apsimx binary executable file (Models.exe)
-#'
-#' @param apsimx_file Path to the .apsimx file to be run
-#'
-#' @param predicted_table_name Name of the predicted table in the datastore
-#'
-#' @param observed_table_name Name of the observed table in the datastore
-#'
-#' @param time_display Logical value used to display (TRUE) or not (FALSE)
-#' simulations duration
-#'
-#' @param multi_process Logical value used to run (TRUE) or not (FALSE) apsim
-#' in multi-process mode. This will generally result in faster execution times
-#' on systems with many cores (ie in a HPC/cluster environment).
-#'
-#' @return A list containing apsimx model apsimx_wrapper options
-#'
-#' @examples
-#'
-#' @export
-#'
-apsimx_wrapper_options <- function(apsimx_path,
-                                  apsimx_file, ... ) {
 
-  # Template list
-  options <- list()
-  options$apsimx_path <- character(0)
-  options$apsimx_file <- character(0)
-  options$time_display <- FALSE
-  options$warning_display <- TRUE
-  options$multi_process <- FALSE
-  options$predicted_table_name <- 'Report'
-  options$observed_table_name <- 'Observed'
-  options$variable_names <- c()
-
-  # For getting the template
-  # running apsimx_wrapper_options
-  if (! nargs()) return(options)
-
-  # For fixing mandatory fields values
-  options$apsimx_path <- apsimx_path
-  options$apsimx_file <- apsimx_file
-
-  # Fixing optional fields,
-  # if corresponding to exact field names
-  # in options list
-  list_names <- names (options)
-  add_args <- list(...)
-
-  for (n in names(add_args)) {
-    if ( n %in% list_names) {
-      options[[n]] <- add_args[[n]]
-    }
-  }
-
-  return(options)
-}
-
-read_apsimx_output <- function(dbFileName, tableName, variables) {
-  con <- DBI::dbConnect(RSQLite::SQLite(), dbFileName)
-
-  # Fetch all data from each table and store it in a list.
-
-  # vars <- ''
-  # for (var in variables) {
-  #   vars <- paste0(vars, 'Report.[', var, '], ')
-  # }
-  #
-  # vars <- paste0(vars, '_Simulations.Name as SimulationName')
-
-  vars <- paste(sprintf("Report.[%s], ", variables),
-                "_Simulations.Name as SimulationName", collapse="")
-
-  sql <- paste0('SELECT ', vars, ' FROM ', tableName, ', _Simulations WHERE _Simulations.ID = ', tableName, '.SimulationID')
-  data <- DBI::dbGetQuery(con, sql)
-  DBI::dbDisconnect(con)
-
-  simulationNames <- data$SimulationName
-  tables <- c()
-  for (i in 1:length(simulationNames)) {
-    sim <- simulationNames[i]
-    tables[[i]] <- data[which(data$SimulationName == sim), ]
-  }
-  names(tables) <- simulationNames
-  return(tables)
-}
 
 apsimx_display_warnings <- function(in_string) {
   # print(in_string)

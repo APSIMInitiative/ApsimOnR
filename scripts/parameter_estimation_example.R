@@ -12,9 +12,9 @@
  var_name=""
 
  # Run the model before optimization for a prior evaluation
- apsim_path=""  # TO ADAPT TO YOUR CASE
- data_dir=""
- model_options=apsim_wrapper_options(apsim_path, data_dir)
+ apsimx_path=""
+ apsimx_file=""
+ model_options=apsim_wrapper_options(apsimx_path, apsimx_file)
  sim_before_optim=apsim_wrapper(model_options=model_options)
 
  # Read and select the corresponding observations
