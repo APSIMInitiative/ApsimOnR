@@ -98,7 +98,13 @@ apsimx_wrapper <- function( param_values=NULL, sit_var_dates_mask=NULL,
   cmd <- paste(exe, file_to_run)
   if (model_options$multi_process)
 	cmd <- paste(cmd, '/MultiProcess')
-  run_file_stdout <- shell(cmd, translate = FALSE, intern = TRUE)
+
+  # run_file_stdout <- shell(cmd, translate = FALSE, intern = TRUE)
+  # Portable version for system call
+  run_file_stdout <- system(cmd,
+                            ignore.stdout = TRUE,
+                            ignore.stderr = TRUE)
+  flag_allsim <- !run_file_stdout
 
   # Store results ---------------------------------------------------------------
   db_file_name <- gsub('.apsimx', '.db', file_to_run)
@@ -112,7 +118,7 @@ apsimx_wrapper <- function( param_values=NULL, sit_var_dates_mask=NULL,
     print(duration)
   }
 
-  return(predicted_data)
+  return(list(sim_list = predicted_data, flag_allsim = flag_allsim))
 
 }
 
