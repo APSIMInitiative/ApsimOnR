@@ -1,0 +1,58 @@
+ library(ApsimOnR)
+ library(SticsOptimizR)
+ library(dplyr)
+ library(nloptr)
+ library(DiceDesign)
+
+
+ # TEST ON ONE MODEL and ONE VARIABLE
+
+ # Select the model
+ #model_name=""
+ model_id = ""
+ var_name=""
+
+ # Run the model before optimization for a prior evaluation
+ apsim_path=""  # TO ADAPT TO YOUR CASE
+ data_dir=""
+ model_options=apsim_wrapper_options(apsim_path, data_dir)
+ sim_before_optim=apsim_wrapper(model_options=model_options)
+
+ # Read and select the corresponding observations
+ obs_list=read_obs_to_list(...)
+ obs_list[[model_id]]=obs_list[[model_id]][,c("Date",var_name)]
+
+ # Set prior information on the parameters to estimate
+ # TODO: adapt var1, var2 to variables names to use
+ prior_information=list(lb=c(var1=0.0005, var2=50),
+                        ub=c(var1=0.0025, var2=400))
+
+ # Set options for the parameter estimation method
+ optim_options=list()
+ optim_options$nb_rep <- 2 # How many times we run the minimization with different parameters
+ optim_options$xtol_rel <- 1e-05 # Tolerance criterion between two iterations
+ optim_options$maxeval <- 20 # Maximum number of iterations executed by the function
+ optim_options$path_results <- "" # path where to store results graphs
+
+ # Run the optimization
+ param_est_values=main_optim(obs_list=obs_list,crit_function=concentrated_wss,
+                             model_function=apsim_wrapper,
+                             model_options=model_options,
+                             optim_options=optim_options,
+                             prior_information=prior_information)
+
+ # Run the model after optimzation
+ sim_after_optim=apsim_wrapper(param_values=param_est_values,model_options=model_options)
+
+ # Plot the results
+ dev.new()
+ par(mfrow = c(1,2))
+ Ymax=max(max(obs_list[[model_id]][,var_name], na.rm=TRUE),
+          max(sim_before_optim$sim_list[[model_id]][,var_name], na.rm=TRUE))
+ plot(sim_before_optim$sim_list[[model_id]][,c("Date",var_name)],type="l",
+      main="Before optimization",ylim=c(0,Ymax+Ymax*0.1))
+ points(obs_list[[model_id]],col="green")
+ plot(sim_after_optim$sim_list[[model_id]][,c("Date",var_name)],type="l",
+      main="After optimization",ylim=c(0,Ymax+Ymax*0.1))
+ points(obs_list[[model_id]],col="green")
+
