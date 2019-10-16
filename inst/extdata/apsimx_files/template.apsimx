@@ -9689,7 +9689,22 @@
       "useFirebird": false,
       "CustomFileName": null,
       "Name": "DataStore",
-      "Children": [],
+      "Children": [
+        {
+          "$type": "Models.PostSimulationTools.ExcelInput, Models",
+          "FileName": "Observed.xlsx",
+          "FileNameMetadata": null,
+          "SheetNames": [
+            "Observed",
+            "MaxLeafSize"
+          ],
+          "Name": "Observed",
+          "Children": [],
+          "IncludeInDocumentation": false,
+          "Enabled": true,
+          "ReadOnly": false
+        }
+      ],
       "IncludeInDocumentation": true,
       "Enabled": true,
       "ReadOnly": false
