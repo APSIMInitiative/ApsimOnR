@@ -35,7 +35,8 @@ apsimx_wrapper_options <- function(apsimx_path,
   options$multi_process <- FALSE
   options$predicted_table_name <- 'Report'
   options$observed_table_name <- 'Observed'
-  options$variable_names <- c()
+  options$variable_names <- character(0)
+  options$met_files_path <- character(0)
 
   # For getting the template
   # running apsimx_wrapper_options

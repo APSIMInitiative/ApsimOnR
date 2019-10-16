@@ -4,7 +4,7 @@
 \alias{change_apsimx_param}
 \title{Changing .apsimx file parameters values}
 \usage{
-change_apsimx_param(file_to_run, param_values)
+change_apsimx_param(exe, file_to_run, param_values)
 }
 \arguments{
 \item{file_to_run}{a .apsimx file path}

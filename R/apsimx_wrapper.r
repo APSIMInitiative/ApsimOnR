@@ -46,10 +46,7 @@ apsimx_wrapper <- function( param_values=NULL, sit_var_dates_mask=NULL,
   apsimx_path <- model_options$apsimx_path
   apsimx_file <- model_options$apsimx_file
   warning_display <- model_options$warning_display
-  exe <- apsimx_path
-  if (.Platform$OS.type == "unix") {
-    exe <- paste('mono', exe)
-  }
+
 
   # Preliminary model checks ---------------------------------------------------
   if (is.null(model_options$apsimx_path) || is.null(model_options$apsimx_file)) {
@@ -64,7 +61,7 @@ apsimx_wrapper <- function( param_values=NULL, sit_var_dates_mask=NULL,
   if (!file.exists(apsimx_file)) {
     stop(paste("apsimx file doesn't exist !", apsimx_file))
   }
-  val <- try(system(paste(exe,'/Version'),
+  val <- try(system(paste(apsimx_path,'/Version'),
                     intern = FALSE,
                     ignore.stdout = TRUE),
              silent = TRUE)
@@ -76,14 +73,19 @@ apsimx_wrapper <- function( param_values=NULL, sit_var_dates_mask=NULL,
   start_time <- Sys.time()
 
   # Copy the .apsimx file to a temp file ----------------------------------------
-  file_to_run <- tempfile('apsimOnR', fileext = '.apsimx')
+  temp_dir <- tempdir()
+  file_to_run <- tempfile('apsimOnR',fileext = '.apsimx')
   file.copy(apsimx_file, file_to_run)
+
+  # copying met file
+  met_files <- list.files(model_options$met_files_path,".met$", full.names = TRUE)
+  file.copy(met_files, temp_dir)
 
 
   # If any parameter value to change
   if ( ! is.null(param_values) ) {
     # Generate config file containing parameter changes ---------------------------
-    out <- change_apsimx_param(exe, file_to_run, param_values)
+    out <- change_apsimx_param(apsimx_path, file_to_run, param_values)
 
     if (!out) {
       stop(paste("Error when changing parameters in", file_to_run))
@@ -108,18 +110,15 @@ apsimx_wrapper <- function( param_values=NULL, sit_var_dates_mask=NULL,
 
 
   # Run apsimx ------------------------------------------------------------------
-  cmd <- paste(exe, file_to_run)
+  cmd <- paste(apsimx_path, file_to_run)
   if (model_options$multi_process)
     cmd <- paste(cmd, '/MultiProcess')
 
-  # run_file_stdout <- shell(cmd, translate = FALSE, intern = TRUE)
   # Portable version for system call
-  run_file_stdout <- system(cmd,
-                            ignore.stdout = TRUE,
-                            ignore.stderr = TRUE)
+  run_file_stdout <- system(cmd,wait = TRUE, intern = TRUE)
 
   # Getting the execution status
-  flag_allsim <- !run_file_stdout
+  flag_allsim <- is.null(attr(run_file_stdout,"status"))
 
   # Store results ---------------------------------------------------------------
   db_file_name <- gsub('.apsimx', '.db', file_to_run)

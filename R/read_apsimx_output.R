@@ -11,18 +11,22 @@ read_apsimx_output <- function(dbFileName, tableName, variables) {
   #
   # vars <- paste0(vars, '_Simulations.Name as SimulationName')
 
-  vars <- paste(sprintf("Report.[%s], ", variables),
-                "_Simulations.Name as SimulationName", collapse="")
+  # TODO: add a request to check if tableName exists in db file
+
+
+  vars <- paste(sprintf("%s.[%s], ",tableName, variables),
+                collapse="")
+  vars <- paste(vars,"_Simulations.Name as SimulationName")
 
   sql <- paste0('SELECT ', vars, ' FROM ', tableName, ', _Simulations WHERE _Simulations.ID = ', tableName, '.SimulationID')
   data <- DBI::dbGetQuery(con, sql)
   DBI::dbDisconnect(con)
 
-  simulationNames <- data$SimulationName
+  simulationNames <- unique(data$SimulationName)
   tables <- c()
   for (i in 1:length(simulationNames)) {
     sim <- simulationNames[i]
-    tables[[i]] <- data[which(data$SimulationName == sim), ]
+    tables[[i]] <- data[which(data$SimulationName == sim), ] %>% select(variables)
   }
   names(tables) <- simulationNames
   return(tables)
