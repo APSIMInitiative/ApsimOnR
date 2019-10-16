@@ -75,14 +75,18 @@ param_est_values=main_optim(obs_list=obs_list,crit_function=concentrated_wss,
 sim_after_optim=apsimx_wrapper(param_values=param_est_values,model_options=model_options)
 
 # Plot the results
+
+var_name <- "Wheat.Leaf.LAI"
+simulation_name <- "GattonRowSpacingRowSpace25cm"
+
 dev.new()
 par(mfrow = c(1,2))
 Ymax=max(max(obs_list[[simulation_name]][,var_name], na.rm=TRUE),
          max(sim_before_optim$sim_list[[simulation_name]][,var_name], na.rm=TRUE))
 plot(sim_before_optim$sim_list[[simulation_name]][,c("Date",var_name)],type="l",
      main="Before optimization",ylim=c(0,Ymax+Ymax*0.1))
-points(obs_list[[simulation_name]],col="green")
+points(obs_list[[simulation_name]]$Date,obs_list[[simulation_name]][[var_name]],col="red")
 plot(sim_after_optim$sim_list[[simulation_name]][,c("Date",var_name)],type="l",
      main="After optimization",ylim=c(0,Ymax+Ymax*0.1))
-points(obs_list[[simulation_name]],col="green")
+points(obs_list[[simulation_name]]$Date,obs_list[[simulation_name]][[var_name]],col="red")
 
