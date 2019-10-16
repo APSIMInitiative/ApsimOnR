@@ -47,7 +47,7 @@
                              prior_information=prior_information)
 
  # Run the model after optimzation
- sim_after_optim=apsim_wrapper(param_values=param_est_values,model_options=model_options)
+ sim_after_optim=apsimx_wrapper(param_values=param_est_values,model_options=model_options)
 
  # Plot the results
  dev.new()

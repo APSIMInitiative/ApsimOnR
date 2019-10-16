@@ -1,46 +1,54 @@
- library(ApsimOnR)
- library(dplyr)
+library(ApsimOnR)
+library(dplyr)
 
 
- # TEST ON ONE MODEL and ONE VARIABLE
+# TEST ON ONE MODEL and ONE VARIABLE
 
- # Select the model
- simulation_name = ""
+# Select the model, waiting for adding
+simulation_name = ""
 
- # Model path and simulation file
- # full path
- apsimx_path=""
- #
- # Getting apsimx file fro the package
-apsimx_file <- system.file(file.path("extdata","apsimx_files", "template.apsimx"),package = "ApsimOnR")
+# Model path and simulation file
+# full path
+apsimx_path="/usr/local/bin/Models"
+#
+# Getting apsimx file fro the package
+files_path <- system.file(file.path("extdata","apsimx_files"),package = "ApsimOnR")
+apsimx_file <- file.path(files_path, "template.apsimx")
 
- # define the variables list
- variable_names=c()
+# met files path
+met_files_path <- file.path(files_path)
 
- # Runnning the model without forcing parameters
- model_options=apsim_wrapper_options(apsimx_path,
-                                     apsimx_file,
-                                     variable_names = variable_names)
+# define the variables list
+variable_names=c("Wheat.Leaf.LAI","Date")
 
- sim=apsim_wrapper(model_options=model_options)
+predicted_table_name <- "DailyReport"
+
+# Runnning the model without forcing parameters
+model_options=apsimx_wrapper_options(apsimx_path,
+                                    apsimx_file,
+                                    variable_names = variable_names,
+                                    predicted_table_name = predicted_table_name,
+                                    met_files_path = met_files_path)
+
+sim=apsimx_wrapper(model_options=model_options)
 
 
- # Run the model with forcing parameters
- # Setting parameters values vector
- param_values <- c()
- names(param_values) <- c()
+# Run the model with forcing parameters
+# Setting parameters values vector
+param_values <- c()
+names(param_values) <- c()
 
- sim_par_forcing=apsim_wrapper(param_values=param_values,model_options=model_options)
+sim_par_forcing=apsimx_wrapper(param_values=param_values,model_options=model_options)
 
- # Plot the results
- dev.new()
- par(mfrow = c(1,2))
- Ymax=max(max(obs_list[[simulation_name]][,var_name], na.rm=TRUE),
-          max(sim_before_optim$sim_list[[simulation_name]][,var_name], na.rm=TRUE))
- plot(sim_before_optim$sim_list[[simulation_name]][,c("Date",var_name)],type="l",
-      main="Before optimization",ylim=c(0,Ymax+Ymax*0.1))
- points(obs_list[[simulation_name]],col="green")
- plot(sim_after_optim$sim_list[[simulation_name]][,c("Date",var_name)],type="l",
-      main="After optimization",ylim=c(0,Ymax+Ymax*0.1))
- points(obs_list[[simulation_name]],col="green")
+# # Plot the results
+# dev.new()
+# par(mfrow = c(1,2))
+# Ymax=max(max(obs_list[[simulation_name]][,var_name], na.rm=TRUE),
+#          max(sim_before_optim$sim_list[[simulation_name]][,var_name], na.rm=TRUE))
+# plot(sim_before_optim$sim_list[[simulation_name]][,c("Date",var_name)],type="l",
+#      main="Before optimization",ylim=c(0,Ymax+Ymax*0.1))
+# points(obs_list[[simulation_name]],col="green")
+# plot(sim_after_optim$sim_list[[simulation_name]][,c("Date",var_name)],type="l",
+#      main="After optimization",ylim=c(0,Ymax+Ymax*0.1))
+# points(obs_list[[simulation_name]],col="green")
 
