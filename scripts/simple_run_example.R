@@ -52,3 +52,6 @@ sim_par_forcing=apsimx_wrapper(param_values=param_values,model_options=model_opt
 #      main="After optimization",ylim=c(0,Ymax+Ymax*0.1))
 # points(obs_list[[simulation_name]],col="green")
 
+plot(as.Date(sim$sim_list$GattonRowSpacingRowSpace50cm$Date),
+     sim$sim_list$GattonRowSpacingRowSpace50cm$Wheat.Leaf.LAI,
+     type = "l")

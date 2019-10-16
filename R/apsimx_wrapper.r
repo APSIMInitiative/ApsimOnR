@@ -81,6 +81,11 @@ apsimx_wrapper <- function( param_values=NULL, sit_var_dates_mask=NULL,
   met_files <- list.files(model_options$met_files_path,".met$", full.names = TRUE)
   file.copy(met_files, temp_dir)
 
+  # copying XL file
+  obs_files <- list.files(model_options$obs_files_path,".xlsx$", full.names = TRUE)
+  file.copy(obs_files,temp_dir)
+
+
 
   # If any parameter value to change
   if ( ! is.null(param_values) ) {
@@ -126,7 +131,17 @@ apsimx_wrapper <- function( param_values=NULL, sit_var_dates_mask=NULL,
   predicted_data <- read_apsimx_output(db_file_name,
                                        model_options$predicted_table_name,
                                        model_options$variable_names)
-  #observed_data <- read_apsimx_output(db_file_name, model_options$observed_table_name, model_options$variable_names)
+  sim_names <- names(predicted_data)
+
+  # obs_list <- read_apsimx_output(db_file_name,
+  #                                model_options$observed_table_name,
+  #                                model_options$variable_names)
+
+  predicted_data <- read_apsimx_output(db_file_name,
+                                       model_options$predicted_table_name,
+                                       model_options$variable_names)
+
+  #predicted_data <- lapply(predicted_data, function(x) mutate(x,Date=as.Date(x)))
 
   # Display simulation duration -------------------------------------------------
   if (model_options$time_display) {
@@ -134,7 +149,10 @@ apsimx_wrapper <- function( param_values=NULL, sit_var_dates_mask=NULL,
     print(duration)
   }
 
-  return(list(sim_list = predicted_data, flag_allsim = flag_allsim))
+  return(list(sim_list = predicted_data,
+              flag_allsim = flag_allsim,
+#              obs_list = obs_list,
+              db_file_name = db_file_name))
 
 }
 

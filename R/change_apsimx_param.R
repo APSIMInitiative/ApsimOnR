@@ -27,14 +27,11 @@ change_apsimx_param <- function(exe, file_to_run, param_values) {
   # Apply parameter changes to the model -----------------------------------------
   cmd <- paste(exe, file_to_run, '/Edit', config_file)
   #edit_file_stdout <- shell(cmd, translate = FALSE, intern = TRUE, mustWork = TRUE)
-  edit_file_stdout <- system(cmd, ignore.stderr = TRUE)
+  edit_file_stdout <- system(cmd, wait = TRUE, intern = TRUE)
 
   #print(edit_file_stdout)
 
   # returning the changes status
-  success <- TRUE
-  if (is.numeric(edit_file_stdout)) success <- FALSE
-
-  return(success)
+  return(is.null(attr(edit_file_stdout,"status")))
 
 }

@@ -37,6 +37,7 @@ apsimx_wrapper_options <- function(apsimx_path,
   options$observed_table_name <- 'Observed'
   options$variable_names <- character(0)
   options$met_files_path <- character(0)
+  options$obs_files_path <- character(0)
 
   # For getting the template
   # running apsimx_wrapper_options

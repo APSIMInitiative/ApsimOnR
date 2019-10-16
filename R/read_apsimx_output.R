@@ -1,15 +1,9 @@
 #' @export
-read_apsimx_output <- function(dbFileName, tableName, variables) {
+read_apsimx_output <- function(dbFileName, tableName, variables, sim_names=NULL) {
   con <- DBI::dbConnect(RSQLite::SQLite(), dbFileName)
 
   # Fetch all data from each table and store it in a list.
 
-  # vars <- ''
-  # for (var in variables) {
-  #   vars <- paste0(vars, 'Report.[', var, '], ')
-  # }
-  #
-  # vars <- paste0(vars, '_Simulations.Name as SimulationName')
 
   # TODO: add a request to check if tableName exists in db file
 
@@ -23,11 +17,29 @@ read_apsimx_output <- function(dbFileName, tableName, variables) {
   DBI::dbDisconnect(con)
 
   simulationNames <- unique(data$SimulationName)
+
+  # Selecting simulations
+  if (!is.null(sim_names)) {
+    sim_idx <- simulationNames %in% sim_names
+    simulationNames <- simulationNames[sim_idx]
+  }
+
   tables <- c()
   for (i in 1:length(simulationNames)) {
     sim <- simulationNames[i]
     tables[[i]] <- data[which(data$SimulationName == sim), ] %>% select(variables)
+
+    if ("Clock.Today" %in% names(tables[[i]])) {
+      tables[[i]] <- mutate(tables[[i]],Date=as.Date(Clock.Today)) %>%
+        select(-c("Clock.Today"))
+    } else if ("Date" %in% names(tables[[i]])) {
+      tables[[i]] <- mutate(tables[[i]],Date=as.Date(Date))
+    }
   }
+
   names(tables) <- simulationNames
+
+  tables <- lapply(tables, function(x) mutate(x,Date=as.Date(Date)))
+
   return(tables)
 }

@@ -1,63 +1,88 @@
- library(ApsimOnR)
- library(SticsOptimizR)
- library(dplyr)
- library(nloptr)
- library(DiceDesign)
+library(ApsimOnR)
+library(SticsOptimizR)
+library(dplyr)
+library(nloptr)
+library(DiceDesign)
 
 
- # TEST ON ONE MODEL and ONE VARIABLE
+# TEST ON ONE MODEL and ONE VARIABLE
 
- # Select the model
- simulation_name = ""
- var_name=""
+# Select the model
+simulation_name = ""
 
- # Run the model before optimization for a prior evaluation
- apsimx_path=""
- apsimx_file=""
- # define the variables list
- variable_names=c()
+# define the variables list
+variable_names=c("Wheat.Leaf.LAI","Wheat.AboveGround.Wt","Clock.Today")
 
- model_options=apsimx_wrapper_options(apsimx_path,
+# Getting apsimx file fro the package
+apsimx_path="/usr/local/bin/Models"
+files_path <- system.file(file.path("extdata","apsimx_files"),package = "ApsimOnR")
+apsimx_file <- file.path(files_path, "template.apsimx")
+
+
+# met files path
+met_files_path <- file.path(files_path)
+
+# obs path
+obs_files_path <- file.path(files_path)
+
+
+predicted_table_name <- "DailyReport"
+observed_table_name <- "Observed"
+
+# Runnning the model without forcing parameters
+model_options=apsimx_wrapper_options(apsimx_path,
                                      apsimx_file,
-                                     variables_names = variables_names)
+                                     variable_names = variable_names,
+                                     predicted_table_name = predicted_table_name,
+                                     met_files_path = met_files_path,
+                                     observed_table_name = observed_table_name,
+                                     obs_files_path = obs_files_path)
 
- sim_before_optim=apsimx_wrapper(model_options=model_options)
 
- # Read and select the corresponding observations
- obs_list=read_obs_to_list(...)
- obs_list[[simulation_name]]=obs_list[[simulation_name]][,c("Date",var_name)]
+sim_before_optim=apsimx_wrapper(model_options=model_options)
 
- # Set prior information on the parameters to estimate
- # TODO: adapt var1, var2 to variables names to use
- prior_information=list(lb=c(var1=0.0005, var2=50),
-                        ub=c(var1=0.0025, var2=400))
+# observationss
+# obs_idx <- names(sim_before_optim$obs_list) %in% names(sim_before_optim$sim_list)
+# obs_list <- sim_before_optim$obs_list[obs_idx]
+obs_list <- read_apsimx_output(sim_before_optim$db_file_name,
+                               model_options$observed_table_name,
+                               model_options$variable_names,
+                               names(sim_before_optim$sim_list))
 
- # Set options for the parameter estimation method
- optim_options=list()
- optim_options$nb_rep <- 2 # How many times we run the minimization with different parameters
- optim_options$xtol_rel <- 1e-05 # Tolerance criterion between two iterations
- optim_options$maxeval <- 20 # Maximum number of iterations executed by the function
- optim_options$path_results <- "" # path where to store results graphs
 
- # Run the optimization
- param_est_values=main_optim(obs_list=obs_list,crit_function=concentrated_wss,
-                             model_function=apsim_wrapper,
-                             model_options=model_options,
-                             optim_options=optim_options,
-                             prior_information=prior_information)
+# Set prior information on the parameters to estimate
+#
+prior_information=list(lb=c(.Simulations.Replacements.Wheat.Leaf.ExtinctionCoeff.VegetativePhase.FixedValue=0.4,
+                            .Simulations.Replacements.Wheat.Leaf.Photosynthesis.RUE.FixedValue=1.4),
+                       ub=c(.Simulations.Replacements.Wheat.Leaf.ExtinctionCoeff.VegetativePhase.FixedValue=0.6,
+                            .Simulations.Replacements.Wheat.Leaf.Photosynthesis.RUE.FixedValue=1.6))
 
- # Run the model after optimzation
- sim_after_optim=apsimx_wrapper(param_values=param_est_values,model_options=model_options)
+# Set options for the parameter estimation method
+optim_options=list()
+optim_options$nb_rep <- 2 # How many times we run the minimization with different parameters
+optim_options$xtol_rel <- 1e-05 # Tolerance criterion between two iterations
+optim_options$maxeval <- 20 # Maximum number of iterations executed by the function
+optim_options$path_results <- "/tmp/optim" # path where to store results graphs
 
- # Plot the results
- dev.new()
- par(mfrow = c(1,2))
- Ymax=max(max(obs_list[[simulation_name]][,var_name], na.rm=TRUE),
-          max(sim_before_optim$sim_list[[simulation_name]][,var_name], na.rm=TRUE))
- plot(sim_before_optim$sim_list[[simulation_name]][,c("Date",var_name)],type="l",
-      main="Before optimization",ylim=c(0,Ymax+Ymax*0.1))
- points(obs_list[[simulation_name]],col="green")
- plot(sim_after_optim$sim_list[[simulation_name]][,c("Date",var_name)],type="l",
-      main="After optimization",ylim=c(0,Ymax+Ymax*0.1))
- points(obs_list[[simulation_name]],col="green")
+# Run the optimization
+param_est_values=main_optim(obs_list=obs_list,crit_function=concentrated_wss,
+                            model_function=apsimx_wrapper,
+                            model_options=model_options,
+                            optim_options=optim_options,
+                            prior_information=prior_information)
+
+# Run the model after optimzation
+sim_after_optim=apsimx_wrapper(param_values=param_est_values,model_options=model_options)
+
+# Plot the results
+dev.new()
+par(mfrow = c(1,2))
+Ymax=max(max(obs_list[[simulation_name]][,var_name], na.rm=TRUE),
+         max(sim_before_optim$sim_list[[simulation_name]][,var_name], na.rm=TRUE))
+plot(sim_before_optim$sim_list[[simulation_name]][,c("Date",var_name)],type="l",
+     main="Before optimization",ylim=c(0,Ymax+Ymax*0.1))
+points(obs_list[[simulation_name]],col="green")
+plot(sim_after_optim$sim_list[[simulation_name]][,c("Date",var_name)],type="l",
+     main="After optimization",ylim=c(0,Ymax+Ymax*0.1))
+points(obs_list[[simulation_name]],col="green")
 
