@@ -9116,6 +9116,7 @@
                   "$type": "Models.Report.Report, Models",
                   "VariableNames": [
                     "[Clock].Today",
+                    "[Clock].Today as Date",
                     "[Soil].SoilWater.SW",
                     "sum([Soil].SoilWater.SWmm) as ProfileWater",
                     "sum([Soil].Nutrient.NO3.kgha) as TotalNO3",
