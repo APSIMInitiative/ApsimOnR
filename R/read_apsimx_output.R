@@ -27,11 +27,10 @@ read_apsimx_output <- function(dbFileName, tableName, variables, sim_names=NULL)
   tables <- c()
   for (i in 1:length(simulationNames)) {
     sim <- simulationNames[i]
-    tables[[i]] <- data[which(data$SimulationName == sim), ] %>% select(variables)
-
+    tables[[i]] <- data[which(data$SimulationName == sim), ] %>% select(one_of(variables))
     if ("Clock.Today" %in% names(tables[[i]])) {
       tables[[i]] <- mutate(tables[[i]],Date=as.Date(Clock.Today)) %>%
-        select(-c("Clock.Today"))
+        select(-Clock.Today)
     } else if ("Date" %in% names(tables[[i]])) {
       tables[[i]] <- mutate(tables[[i]],Date=as.Date(Date))
     }

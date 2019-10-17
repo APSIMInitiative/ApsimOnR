@@ -61,10 +61,8 @@ apsimx_wrapper <- function( param_values=NULL, sit_var_dates_mask=NULL,
   if (!file.exists(apsimx_file)) {
     stop(paste("apsimx file doesn't exist !", apsimx_file))
   }
-  val <- try(system(paste(apsimx_path,'/Version'),
-                    intern = FALSE,
-                    ignore.stdout = TRUE),
-             silent = TRUE)
+  cmd <- paste(apsimx_path, '/Version')
+  val <- system(cmd,wait = TRUE, intern = FALSE, show.output.on.console = FALSE, ignore.stdout = TRUE, ignore.stderr = TRUE)
 
   if (val != 0) {
     stop(paste(apsimx_path,"is not executable or is not a apsimx executable !"))

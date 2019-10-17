@@ -7,6 +7,8 @@ library(DiceDesign)
 
 # TEST ON ONE MODEL and ONE VARIABLE
 
+start_time <- Sys.time()
+
 # Select the model
 simulation_name = ""
 
@@ -78,7 +80,8 @@ sim_after_optim=apsimx_wrapper(param_values=param_est_values,model_options=model
 
 var_name <- "Wheat.Leaf.LAI"
 simulation_name <- "GattonRowSpacingRowSpace25cm"
-
+duration <- Sys.time() - start_time
+print(sprintf('duration: %s', duration))
 dev.new()
 par(mfrow = c(1,2))
 Ymax=max(max(obs_list[[simulation_name]][,var_name], na.rm=TRUE),
