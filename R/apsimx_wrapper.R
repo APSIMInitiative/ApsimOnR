@@ -55,14 +55,14 @@ apsimx_wrapper <- function( param_values=NULL, sit_var_dates_mask=NULL,
   }
 
   # Test if the model executable file exists is executable ----------------------
-  if (!file.exists(apsimx_path)){
+  if (!file.exists(apsimx_path)) {
     stop(paste("apsimx executable file doesn't exist !",apsimx_path))
   }
   if (!file.exists(apsimx_file)) {
     stop(paste("apsimx file doesn't exist !", apsimx_file))
   }
   cmd <- paste(apsimx_path, '/Version')
-  val <- system(cmd,wait = TRUE, intern = FALSE, show.output.on.console = FALSE, ignore.stdout = TRUE, ignore.stderr = TRUE)
+  val <- system(cmd,wait = TRUE, intern = FALSE, ignore.stdout = TRUE, ignore.stderr = TRUE)
 
   if (val != 0) {
     stop(paste(apsimx_path,"is not executable or is not a apsimx executable !"))
@@ -94,28 +94,12 @@ apsimx_wrapper <- function( param_values=NULL, sit_var_dates_mask=NULL,
       stop(paste("Error when changing parameters in", file_to_run))
     }
 
-    # config_file <- tempfile('apsimOnR', fileext = '.conf')
-    # parameter_names <- names(param_values)
-    # fileConn <- file(config_file)
-    # lines <- vector("character", length(param_values))
-    # for (i in 1:length(param_values))
-    #   lines[i] <- paste(parameter_names[i], '=', as.character(param_values[i]))
-    # writeLines(lines, fileConn)
-    # close(fileConn)
-    #
-    # # Apply parameter changes to the model -----------------------------------------
-    # cmd <- paste(exe, file_to_run, '/Edit', config_file)
-    # #edit_file_stdout <- shell(cmd, translate = FALSE, intern = TRUE, mustWork = TRUE)
-    # edit_file_stdout <- system(cmd, intern = TRUE)
-
-    #print(stdout)
   }
 
 
   # Run apsimx ------------------------------------------------------------------
   cmd <- paste(apsimx_path, file_to_run)
-  if (model_options$multi_process)
-    cmd <- paste(cmd, '/MultiProcess')
+  if (model_options$multi_process)  cmd <- paste(cmd, '/MultiProcess')
 
   # Portable version for system call
   run_file_stdout <- system(cmd,wait = TRUE, intern = TRUE)
@@ -129,18 +113,23 @@ apsimx_wrapper <- function( param_values=NULL, sit_var_dates_mask=NULL,
   predicted_data <- read_apsimx_output(db_file_name,
                                        model_options$predicted_table_name,
                                        model_options$variable_names)
-  sim_names <- names(predicted_data)
 
-  # obs_list <- read_apsimx_output(db_file_name,
-  #                                model_options$observed_table_name,
-  #                                model_options$variable_names)
+  # filtering on situations mask
+  # browser()
+  if (! is.null(sit_var_dates_mask) ) {
+    situation_names <- names(sit_var_dates_mask)
+    predicted_data <- predicted_data[situation_names]
+    vars_list <- lapply(sit_var_dates_mask, colnames)
+    dates_list <- lapply(sit_var_dates_mask, function(x) x$Date)
 
-  predicted_data <- read_apsimx_output(db_file_name,
-                                       model_options$predicted_table_name,
-                                       model_options$variable_names)
+    for (i in 1:length(situation_names)) {
+      situation_name <- situation_names[i]
+      predicted_data[[situation_name]] <- select(predicted_data[[situation_name]],vars_list[[i]]) %>%
+        filter(Date %in% dates_list[[i]])
 
-  #predicted_data <- lapply(predicted_data, function(x) mutate(x,Date=as.Date(x)))
+    }
 
+  }
   # Display simulation duration -------------------------------------------------
   if (model_options$time_display) {
     duration <- Sys.time() - start_time
@@ -149,15 +138,7 @@ apsimx_wrapper <- function( param_values=NULL, sit_var_dates_mask=NULL,
 
   return(list(sim_list = predicted_data,
               flag_allsim = flag_allsim,
-#              obs_list = obs_list,
               db_file_name = db_file_name))
 
-}
 
-
-
-apsimx_display_warnings <- function(in_string) {
-  # print(in_string)
-  # print(length(in_string))
-  if (nchar(in_string) ) warning(in_string, call. = FALSE)
 }
