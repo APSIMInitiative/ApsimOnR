@@ -22,18 +22,18 @@ apsimx_file <- file.path(files_path, "template.apsimx")
 
 
 # met files path
-met_files_path <- file.path(files_path)
+met_files_path <- files_path
 
 # obs path
-obs_files_path <- file.path(files_path)
+obs_files_path <- files_path
 
 
 predicted_table_name <- "DailyReport"
 observed_table_name <- "Observed"
 
 # Runnning the model without forcing parameters
-model_options=apsimx_wrapper_options(apsimx_path,
-                                     apsimx_file,
+model_options=apsimx_wrapper_options(apsimx_path = apsimx_path,
+                                     apsimx_file = apsimx_file,
                                      variable_names = variable_names,
                                      predicted_table_name = predicted_table_name,
                                      met_files_path = met_files_path,
@@ -43,7 +43,8 @@ model_options=apsimx_wrapper_options(apsimx_path,
 
 sim_before_optim=apsimx_wrapper(model_options=model_options)
 
-# observationss
+
+# observations
 # obs_idx <- names(sim_before_optim$obs_list) %in% names(sim_before_optim$sim_list)
 # obs_list <- sim_before_optim$obs_list[obs_idx]
 obs_list <- read_apsimx_output(sim_before_optim$db_file_name,
@@ -64,16 +65,17 @@ optim_options=list()
 optim_options$nb_rep <- 2 # How many times we run the minimization with different parameters
 optim_options$xtol_rel <- 1e-05 # Tolerance criterion between two iterations
 optim_options$maxeval <- 20 # Maximum number of iterations executed by the function
-optim_options$path_results <- "/tmp/optim" # path where to store results graphs
+optim_options$path_results <- "/home/plecharpent/tmp/tests_SticsOptimizR/estim_example" # path where to store results graphs
 
 # Run the optimization
-param_est_values=main_optim(obs_list=obs_list,crit_function=concentrated_wss,
+param_est_values=main_optim(obs_list=obs_list,
+                            crit_function=concentrated_wss,
                             model_function=apsimx_wrapper,
                             model_options=model_options,
                             optim_options=optim_options,
                             prior_information=prior_information)
 
-# Run the model after optimzation
+# Run the model after optimization
 sim_after_optim=apsimx_wrapper(param_values=param_est_values,model_options=model_options)
 
 # Plot the results
