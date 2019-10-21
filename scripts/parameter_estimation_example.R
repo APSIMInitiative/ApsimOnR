@@ -38,7 +38,8 @@ model_options=apsimx_wrapper_options(apsimx_path = apsimx_path,
                                      predicted_table_name = predicted_table_name,
                                      met_files_path = met_files_path,
                                      observed_table_name = observed_table_name,
-                                     obs_files_path = obs_files_path)
+                                     obs_files_path = obs_files_path,
+                                     multi_process = TRUE)
 
 
 sim_before_optim=apsimx_wrapper(model_options=model_options)
