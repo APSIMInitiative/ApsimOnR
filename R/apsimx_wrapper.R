@@ -72,12 +72,14 @@ apsimx_wrapper <- function( param_values=NULL, sit_var_dates_mask=NULL,
 
   # Copy the .apsimx file to a temp file ----------------------------------------
   temp_dir <- tempdir()
-  file_to_run <- tempfile('apsimOnR',fileext = '.apsimx')
+  file_to_run <- tempfile('apsimOnR', tempdir = temp_dir, fileext = '.apsimx')
   file.copy(apsimx_file, file_to_run)
 
   # copying met file
   met_files <- list.files(model_options$met_files_path,".met$", full.names = TRUE)
   file.copy(met_files, temp_dir)
+
+  # browser()
 
   # copying XL file
   obs_files <- list.files(model_options$obs_files_path,".xlsx$", full.names = TRUE)
@@ -101,14 +103,19 @@ apsimx_wrapper <- function( param_values=NULL, sit_var_dates_mask=NULL,
   cmd <- paste(apsimx_path, file_to_run)
   if (model_options$multi_process)  cmd <- paste(cmd, '/MultiProcess')
 
+
+
   # Portable version for system call
   run_file_stdout <- system(cmd,wait = TRUE, intern = TRUE)
+
+
 
   # Getting the execution status
   flag_allsim <- is.null(attr(run_file_stdout,"status"))
 
   # Store results ---------------------------------------------------------------
   db_file_name <- gsub('.apsimx', '.db', file_to_run)
+  # print(db_file_name)
 
   predicted_data <- read_apsimx_output(db_file_name,
                                        model_options$predicted_table_name,
