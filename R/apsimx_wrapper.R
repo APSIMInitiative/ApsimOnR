@@ -45,6 +45,7 @@ apsimx_wrapper <- function( param_values=NULL, sit_var_dates_mask=NULL,
 
   apsimx_path <- model_options$apsimx_path
   apsimx_file <- model_options$apsimx_file
+  apsimx_file_dir <- dirname(apsimx_file)
   warning_display <- model_options$warning_display
 
 
@@ -62,9 +63,9 @@ apsimx_wrapper <- function( param_values=NULL, sit_var_dates_mask=NULL,
     stop(paste("apsimx file doesn't exist !", apsimx_file))
   }
   cmd <- paste(apsimx_path, '/Version')
-  val <- system(cmd,wait = TRUE, intern = FALSE, ignore.stdout = TRUE, ignore.stderr = TRUE)
+  val <- system(cmd, wait = TRUE, intern = TRUE)
 
-  if (val != 0) {
+  if ( !is.null(attr(val, "status"))) {
     stop(paste(apsimx_path,"is not executable or is not a apsimx executable !"))
   }
 
@@ -101,16 +102,12 @@ apsimx_wrapper <- function( param_values=NULL, sit_var_dates_mask=NULL,
 
   }
 
-
   # Run apsimx ------------------------------------------------------------------
   cmd <- paste(apsimx_path, file_to_run)
   if (model_options$multi_process)  cmd <- paste(cmd, '/MultiProcess')
 
-
-
   # Portable version for system call
   run_file_stdout <- system(cmd,wait = TRUE, intern = TRUE)
-
 
 
   # Getting the execution status
@@ -119,11 +116,13 @@ apsimx_wrapper <- function( param_values=NULL, sit_var_dates_mask=NULL,
   # Preserve .apsimx file in case of error
   if (!flag_allsim) {
     print(run_file_stdout)
-    backupFileName <- gsub('.apsimx', '.error.apsimx', apsimx_file)
-    file.copy(file_to_run, backupFileName)
 
-    backup_db_file <- gsub('.apsimx', '.error.db', apsimx_file)
-    file.copy(db_file_name, backup_db_file)
+    apsimx_name <- basename(apsimx_file)
+    backupFileName <- gsub('.apsimx', '.error.apsimx', apsimx_name)
+    file.copy(file_to_run, file.path(apsimx_file_dir,backupFileName))
+
+    backup_db_file <- gsub('.apsimx', '.error.db', apsimx_name)
+    file.copy(db_file_name, file.path(apsimx_file_dir,backup_db_file))
   }
 
   # Store results ---------------------------------------------------------------
