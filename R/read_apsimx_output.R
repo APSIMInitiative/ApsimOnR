@@ -38,7 +38,5 @@ read_apsimx_output <- function(dbFileName, tableName, variables, sim_names=NULL)
 
   names(tables) <- simulationNames
 
-  tables <- lapply(tables, function(x) mutate(x,Date=as.Date(Date)))
-
   return(tables)
 }
