@@ -1,5 +1,6 @@
 library(ApsimOnR)
 library(dplyr)
+library(RSQLite)
 
 
 # TEST ON ONE MODEL and ONE VARIABLE
