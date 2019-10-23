@@ -72,20 +72,23 @@ apsimx_wrapper <- function( param_values=NULL, sit_var_dates_mask=NULL,
 
   # Copy the .apsimx file to a temp file ----------------------------------------
   temp_dir <- tempdir()
-  file_to_run <- tempfile('apsimOnR', tempdir = temp_dir, fileext = '.apsimx')
+  file_to_run <- tempfile('apsimOnR', tmpdir = temp_dir, fileext = '.apsimx')
+  db_file_name <- gsub('.apsimx', '.db', file_to_run)
   file.copy(apsimx_file, file_to_run)
 
   # copying met file
   met_files <- list.files(model_options$met_files_path,".met$", full.names = TRUE)
   file.copy(met_files, temp_dir)
 
-  # browser()
 
   # copying XL file
   obs_files <- list.files(model_options$obs_files_path,".xlsx$", full.names = TRUE)
   file.copy(obs_files,temp_dir)
 
-
+  # Delete .db file if it already exists (just in case)
+  if (file.exists(db_file_name)) {
+    file.delete(db_file_name)
+  }
 
   # If any parameter value to change
   if ( ! is.null(param_values) ) {
@@ -113,10 +116,17 @@ apsimx_wrapper <- function( param_values=NULL, sit_var_dates_mask=NULL,
   # Getting the execution status
   flag_allsim <- is.null(attr(run_file_stdout,"status"))
 
-  # Store results ---------------------------------------------------------------
-  db_file_name <- gsub('.apsimx', '.db', file_to_run)
-  # print(db_file_name)
+  # Preserve .apsimx file in case of error
+  if (!flag_allsim) {
+    print(run_file_stdout)
+    backupFileName <- gsub('.apsimx', '.error.apsimx', apsimx_file)
+    file.copy(file_to_run, backupFileName)
 
+    backup_db_file <- gsub('.apsimx', '.error.db', apsimx_file)
+    file.copy(db_file_name, backup_db_file)
+  }
+
+  # Store results ---------------------------------------------------------------
   predicted_data <- read_apsimx_output(db_file_name,
                                        model_options$predicted_table_name,
                                        model_options$variable_names)
