@@ -16,7 +16,10 @@ files_path <- system.file(file.path("extdata","apsimx_files"),package = "ApsimOn
 apsimx_file <- file.path(files_path, "template.apsimx")
 
 # met files path
-met_files_path <- file.path(files_path)
+met_files_path <- files_path
+
+# observed files path
+obs_files_path <- files_path
 
 # define the variables list
 variable_names=c("Wheat.Leaf.LAI","Date")
@@ -28,7 +31,8 @@ model_options=apsimx_wrapper_options(apsimx_path,
                                     apsimx_file,
                                     variable_names = variable_names,
                                     predicted_table_name = predicted_table_name,
-                                    met_files_path = met_files_path)
+                                    met_files_path = met_files_path,
+                                    obs_files_path = obs_files_path)
 
 sim=apsimx_wrapper(model_options=model_options)
 
