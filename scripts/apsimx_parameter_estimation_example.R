@@ -10,10 +10,11 @@ library(DiceDesign)
 start_time <- Sys.time()
 
 # Select the model
-simulation_name = ""
+simulation_name <- "GattonRowSpacingRowSpace25cm"
 
 # define the variables list
-variable_names=c("Wheat.Leaf.LAI","Wheat.AboveGround.Wt","Clock.Today")
+#variable_names=c("Wheat.Leaf.LAI","Wheat.AboveGround.Wt","Clock.Today")
+variable_names=c("Wheat.Leaf.LAI","Clock.Today")
 
 # Getting apsimx file fro the package
 apsimx_path="/usr/local/bin/Models"
@@ -38,8 +39,7 @@ model_options=apsimx_wrapper_options(apsimx_path = apsimx_path,
                                      predicted_table_name = predicted_table_name,
                                      met_files_path = met_files_path,
                                      observed_table_name = observed_table_name,
-                                     obs_files_path = obs_files_path,
-                                     multi_process = TRUE)
+                                     obs_files_path = obs_files_path)
 
 
 sim_before_optim=apsimx_wrapper(model_options=model_options)
@@ -53,6 +53,8 @@ obs_list <- read_apsimx_output(sim_before_optim$db_file_name,
                                model_options$variable_names,
                                names(sim_before_optim$sim_list))
 
+obs_list=obs_list[simulation_name]
+names(obs_list) <- simulation_name
 
 # Set prior information on the parameters to estimate
 #
@@ -63,9 +65,9 @@ prior_information=list(lb=c(.Simulations.Replacements.Wheat.Leaf.ExtinctionCoeff
 
 # Set options for the parameter estimation method
 optim_options=list()
-optim_options$nb_rep <- 2 # How many times we run the minimization with different parameters
+optim_options$nb_rep <- 1 # How many times we run the minimization with different parameters
 optim_options$xtol_rel <- 1e-05 # Tolerance criterion between two iterations
-optim_options$maxeval <- 20 # Maximum number of iterations executed by the function
+optim_options$maxeval <- 5 # Maximum number of iterations executed by the function
 optim_options$path_results <- "/home/plecharpent/tmp/tests_SticsOptimizR/estim_example" # path where to store results graphs
 
 # Run the optimization
