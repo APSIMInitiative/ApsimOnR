@@ -24,8 +24,12 @@ read_apsimx_output <- function(dbFileName, tableName, variables, sim_names=NULL)
     simulationNames <- simulationNames[sim_idx]
   }
 
-  tables <- c()
-  for (i in 1:length(simulationNames)) {
+  # Creating empty list
+  sim_nb <- length(simulationNames)
+  tables <- vector("list", sim_nb)
+
+  # Filling it with results
+  for (i in 1:sim_nb) {
     sim <- simulationNames[i]
     tables[[i]] <- data[which(data$SimulationName == sim), ] %>% select(one_of(variables))
     if ("Clock.Today" %in% names(tables[[i]])) {
