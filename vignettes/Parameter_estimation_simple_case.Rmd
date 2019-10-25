@@ -19,20 +19,21 @@ dep_auto()
 
 A simple parameter estimation with a single situation, a single observed variable and 2 estimated parameters, just to illustrate how to use the package.
 
->     TO BE ADAPTED: Data comes from a maize crop experiment (see description in Wallach et al., 2011).
+Data comes from a ... experiment (see description ...).
 
 The parameter estimation is performed using the Nelder-Meade simplex method implemented in the `nloptr` package.
 
 To regulate the number of simulations (and thus the duration of execution), reduce the number of repetition of the minimization and/or the maximum number of evaluation (see section "Set options for the parameter estimation method").
 
-The execution of this Rmarkdown document requires the path to the ApsimX model. By default it uses 
-```{r eval=FALSE}
+The execution of this Rmarkdown document requires the path to the ApsimX model. By default it uses the one calculated in this document header stored in `params$apsimx_file`
+```{r}
 
+apsimx_path <- params$apsimx_path
 apsimx_path
 
 ```
-(see apsimx_path element of the list  params in te document header at the beginning of the .Rmd file).
-If you want to change the value of this parameter you may use Knit, then *"Knit with parameters"*.
+
+If you want to change the value of this parameter you may use Knit, then *"Knit with parameters"* or set it manually in a chunk (`apsimx_path <- path/to/exe/file`) .
 
 ## Initialisation step
 
@@ -172,7 +173,7 @@ The number of repetitions `nb_rep` is advised to be set at least to 5, while 10 
 ```{r eval=TRUE, message=FALSE, warning=FALSE}
 
 optim_options=list() 
-optim_options$nb_rep <- 1 # Number of repetitions of the minimization 
+optim_options$nb_rep <- 2 # Number of repetitions of the minimization 
 # (each time starting with different initial
 # values for the estimated parameters) 
 optim_options$maxeval <- 10 # Maximum number of evaluations of the 
@@ -216,7 +217,7 @@ print(paste("Results of the optimization were saved in",
 The results printed in output on the R console are the following:
 ```{r echo=TRUE, eval=TRUE}
 # ExtinctionCoeff and RUE
-param_est_values
+param_est_values$final_values
 
 
 ```
@@ -225,20 +226,43 @@ Complementary graphs and data are stored in the **`r optim_options$path_results`
 
 ```{r echo=FALSE, image_grobs, fig.show = "hold", out.width = "45%", fig.align = "default"}
 
-# CHANGE PARAMETERS NAMES !
-# .Simulations.Replacements.Wheat.Leaf.ExtinctionCoeff.VegetativePhase.FixedValue
-# .Simulations.Replacements.Wheat.Leaf.Photosynthesis.RUE.FixedValue
+#print("ALL data from main_optim...")
 
-#knitr::include_graphics(file.path(optim_options$path_results,"ResultsSimpleCase","estimInit_dlaimax.PNG"))
+#print("init values")
+init_values <- param_est_values$init_values
+#init_values
+#print("est values")
+est_values <- param_est_values$est_values
+#est_values
+#print("final values")
+final_values <- param_est_values$final_values
+#final_values
+param_names <- names(param_est_values$final_values)
+#print("min index")
+ind_min_crit <- param_est_values$ind_min_crit
+#ind_min_crit
 
-#knitr::include_graphics(file.path(optim_options$path_results,"ResultsSimpleCase","estimInit_durvieF.PNG"))
+bounds=get_params_bounds(prior_information)
+
+for (ipar in 1:length(param_names)) {
+  plot(init_values[,ipar], est_values[,ipar],
+       main = "Estimated vs Initial values of the parameters for different repetitions",
+       text(init_values[,ipar], est_values[,ipar], pos=1,col="black"),
+       xlim = c(bounds$lb[ipar],bounds$ub[ipar]),
+       ylim = c(bounds$lb[ipar],bounds$ub[ipar]),
+       xlab = paste("Initial value for", param_names[ipar]),
+       ylab = paste("Estimated value for", param_names[ipar]))
+  text(init_values[ind_min_crit,ipar], est_values[ind_min_crit,ipar],
+       labels = ind_min_crit, pos=1,col="red")
+}
 
 ```
 
 **TO BE ADAPTED** *Figure 1:  plots of estimated vs initial values of parameters dlaimax and durvieF. Numbers represent the repetition number of the minimization. The number in red, 2 in this case, is the minimization that lead to the minimal value of the criterion among all repetitions. In this case, the minimizations converge towards 2 different values for the parameters, which indicates the presence of a local minimum. Values of durvieF are close to the bounds. In realistic calibration cases this may indicate the presence of a large error in the observation values or in the model output values simulated (this simple case with only one situation does not allow to derive such conclusion).*
 
 ```{r echo=FALSE }
-load(file.path(optim_options$path_results,"optim_results.Rdata"))
+#load(file.path(optim_options$path_results,"optim_results.Rdata"))
+nlo <- param_est_values$nlo
 last_rep <- length(nlo)
 ```
 
@@ -256,7 +280,7 @@ In this case, the `param_values` argument is set so that estimated values of the
 
 ```{r eval=TRUE, message=FALSE, warning=FALSE}
 
-sim_after_optim=apsimx_wrapper(param_values=param_est_values,
+sim_after_optim=apsimx_wrapper(param_values=param_est_values$final_values,
                                model_options=model_options)
 
 ```
@@ -265,8 +289,7 @@ sim_after_optim=apsimx_wrapper(param_values=param_est_values,
 
 ```{r eval=TRUE, message=FALSE, warning=FALSE,out.width = '80%'}
 var_name = c("Wheat.Leaf.LAI")
-#png(file.path(optim_options$path_results,"sim_obs_plots.png"),
-#     width = 15, height = 10, units = "cm", res=1000)
+
 par(mfrow = c(1,2))
 
 # Simulated and observed LAI before optimization
@@ -280,10 +303,9 @@ plot(sim_after_optim$sim_list[[sit_name]][,c("Date",var_name)],type="l",
 points(obs_list[[sit_name]]$Date,obs_list[[sit_name]][[var_name]],col="red")
 
 
-
 ```
 
-```{r echo = FALSE}
+```{r echo = FALSE, out.width = '80%', fig.cap="Figure 2: plots of simulated and observed target variable before and after optimization. If the gap between simulated and observed values has been drastically reduced (even) for some of the points: the minimizer has done its job!"}
 # exporting plot to a png file
 png <- dev.print(device = png,
           file = file.path(optim_options$path_results,"sim_obs_plots.png"),
@@ -295,9 +317,5 @@ png <- dev.print(device = png,
 ```
 
 
-```{r echo=FALSE,out.width = '80%', fig.cap="Figure 2: plots of simulated and observed target variable before and after optimization. The gap between simulated and observed values has been drastically reduced: the minimizer has done its job!"}
 
-#knitr::include_graphics(optim_options$path_results, "ResultsSimpleCase","sim_obs_plots.png")
-
-```
 
