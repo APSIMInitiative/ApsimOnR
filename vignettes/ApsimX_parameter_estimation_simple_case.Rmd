@@ -19,7 +19,7 @@ dep_auto()
 
 A simple parameter estimation with a single situation, a single observed variable and 2 estimated parameters, just to illustrate how to use the package.
 
-Data comes from a ... experiment (see description ...).
+> TODO : Data comes from a ... experiment (see description in apsimx file / interface...).
 
 The parameter estimation is performed using the Nelder-Meade simplex method implemented in the `nloptr` package.
 
@@ -258,7 +258,7 @@ for (ipar in 1:length(param_names)) {
 
 ```
 
-**TO BE ADAPTED** *Figure 1:  plots of estimated vs initial values of parameters dlaimax and durvieF. Numbers represent the repetition number of the minimization. The number in red, 2 in this case, is the minimization that lead to the minimal value of the criterion among all repetitions. In this case, the minimizations converge towards 2 different values for the parameters, which indicates the presence of a local minimum. Values of durvieF are close to the bounds. In realistic calibration cases this may indicate the presence of a large error in the observation values or in the model output values simulated (this simple case with only one situation does not allow to derive such conclusion).*
+Figure 1:  plots of estimated vs initial values of parameters *ExtinctionCoeff* and *RUE*. Numbers represent the repetition number of the minimization. The number in red, 2 in this case, is the minimization that lead to the minimal value of the criterion among all repetitions. In this case, minimizations converge towards 2 different values for one of the *RUE* parameter , which indicates the presence of a local minimum. Values of *ExtinctionCoeff* are relatively close to the lower bound value. In realistic calibration cases this may indicate the presence of a large error in the observation values or in the model output values simulated (this simple case with only one situation does not allow to derive such conclusion).
 
 ```{r echo=FALSE }
 #load(file.path(optim_options$path_results,"optim_results.Rdata"))
