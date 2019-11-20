@@ -13,8 +13,7 @@ start_time <- Sys.time()
 simulation_name <- "GattonRowSpacingRowSpace25cm"
 
 # define the variables list
-#variable_names=c("Wheat.Leaf.LAI","Wheat.AboveGround.Wt","Clock.Today")
-variable_names=c("Wheat.Leaf.LAI","Clock.Today")
+variable_names=c("Wheat.Leaf.LAI")
 
 # Getting apsimx file fro the package
 apsimx_path="/usr/local/bin/Models"
@@ -65,13 +64,13 @@ prior_information=list(lb=c(.Simulations.Replacements.Wheat.Leaf.ExtinctionCoeff
 
 # Set options for the parameter estimation method
 optim_options=list()
-optim_options$nb_rep <- 1 # How many times we run the minimization with different parameters
+optim_options$nb_rep <- 3 # How many times we run the minimization with different parameters
 optim_options$xtol_rel <- 1e-05 # Tolerance criterion between two iterations
-optim_options$maxeval <- 5 # Maximum number of iterations executed by the function
+optim_options$maxeval <- 50 # Maximum number of iterations executed by the function
 optim_options$path_results <- "/home/plecharpent/tmp/tests_SticsOptimizR/estim_example" # path where to store results graphs
 
 # Run the optimization
-param_est_values=main_optim(obs_list=obs_list,
+optim_output=main_optim(obs_list=obs_list,
                             crit_function=concentrated_wss,
                             model_function=apsimx_wrapper,
                             model_options=model_options,
@@ -79,7 +78,8 @@ param_est_values=main_optim(obs_list=obs_list,
                             prior_information=prior_information)
 
 # Run the model after optimization
-sim_after_optim=apsimx_wrapper(param_values=param_est_values,model_options=model_options)
+sim_after_optim=apsimx_wrapper(param_values= optim_output$final_values,
+                               model_options=model_options)
 
 # Plot the results
 

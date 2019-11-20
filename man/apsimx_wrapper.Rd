@@ -5,8 +5,12 @@
 \title{Running .apsimx files from txt input files stored in one directory
 per `situation`, simulated results are returned in a list}
 \usage{
-apsimx_wrapper(param_values = NULL, sit_var_dates_mask = NULL,
-  prior_information = NULL, model_options)
+apsimx_wrapper(
+  param_values = NULL,
+  sit_var_dates_mask = NULL,
+  prior_information = NULL,
+  model_options
+)
 }
 \arguments{
 \item{param_values}{named vector containing the value(s) and names of the

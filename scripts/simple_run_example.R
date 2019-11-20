@@ -23,7 +23,7 @@ met_files_path <- files_path
 obs_files_path <- files_path
 
 # define the variables list
-variable_names=c("Wheat.Leaf.LAI","Date")
+variable_names=c("Wheat.Leaf.LAI")
 
 predicted_table_name <- "DailyReport"
 
