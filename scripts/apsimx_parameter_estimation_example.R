@@ -1,5 +1,5 @@
 library(ApsimOnR)
-library(SticsOptimizR)
+library(CroptimizR)
 library(dplyr)
 library(nloptr)
 library(DiceDesign)
@@ -57,7 +57,7 @@ names(obs_list) <- simulation_name
 
 # Set prior information on the parameters to estimate
 #
-prior_information=list(lb=c(.Simulations.Replacements.Wheat.Leaf.ExtinctionCoeff.VegetativePhase.FixedValue=0.4,
+param_info=list(lb=c(.Simulations.Replacements.Wheat.Leaf.ExtinctionCoeff.VegetativePhase.FixedValue=0.4,
                             .Simulations.Replacements.Wheat.Leaf.Photosynthesis.RUE.FixedValue=1.4),
                        ub=c(.Simulations.Replacements.Wheat.Leaf.ExtinctionCoeff.VegetativePhase.FixedValue=0.6,
                             .Simulations.Replacements.Wheat.Leaf.Photosynthesis.RUE.FixedValue=1.6))
@@ -70,12 +70,11 @@ optim_options$maxeval <- 50 # Maximum number of iterations executed by the funct
 optim_options$path_results <- "/home/plecharpent/tmp/tests_SticsOptimizR/estim_example" # path where to store results graphs
 
 # Run the optimization
-optim_output=main_optim(obs_list=obs_list,
-                            crit_function=concentrated_wss,
-                            model_function=apsimx_wrapper,
-                            model_options=model_options,
-                            optim_options=optim_options,
-                            prior_information=prior_information)
+optim_output=estim_param(obs_list=obs_list,
+                         model_function=apsimx_wrapper,
+                         model_options=model_options,
+                         optim_options=optim_options,
+                         param_info=param_info)
 
 # Run the model after optimization
 sim_after_optim=apsimx_wrapper(param_values= optim_output$final_values,
@@ -91,10 +90,10 @@ dev.new()
 par(mfrow = c(1,2))
 Ymax=max(max(obs_list[[simulation_name]][,var_name], na.rm=TRUE),
          max(sim_before_optim$sim_list[[simulation_name]][,var_name], na.rm=TRUE))
-plot(sim_before_optim$sim_list[[simulation_name]][,c("Date",var_name)],type="l",
+plot(sim_before_optim$sim_list[[1]][[simulation_name]][,c("Date",var_name)],type="l",
      main="Before optimization",ylim=c(0,Ymax+Ymax*0.1))
 points(obs_list[[simulation_name]]$Date,obs_list[[simulation_name]][[var_name]],col="red")
-plot(sim_after_optim$sim_list[[simulation_name]][,c("Date",var_name)],type="l",
+plot(sim_after_optim$sim_list[[1]][[simulation_name]][,c("Date",var_name)],type="l",
      main="After optimization",ylim=c(0,Ymax+Ymax*0.1))
 points(obs_list[[simulation_name]]$Date,obs_list[[simulation_name]][[var_name]],col="red")
 

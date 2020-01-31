@@ -65,10 +65,10 @@ sim_par_forcing=apsimx_wrapper(param_values=param_values,model_options=model_opt
 
 #' ### Results plots
 #' - Getting dates
-Dates <- as.Date(sim$sim_list[[situation_name]]$Date)
+Dates <- as.Date(sim$sim_list[[1]][[situation_name]]$Date)
 #' - Getting LAI
-LAI <- sim$sim_list[[situation_name]]$Wheat.Leaf.LAI
-LAI_forcing <- sim_par_forcing$sim_list[[situation_name]]$Wheat.Leaf.LAI
+LAI <- sim$sim_list[[1]][[situation_name]]$Wheat.Leaf.LAI
+LAI_forcing <- sim_par_forcing$sim_list[[1]][[situation_name]]$Wheat.Leaf.LAI
 #' - LAI dynamics
 
 ggplot(data.frame(Dates=Dates,LAI=LAI), aes(x=Dates, y=LAI)) +
