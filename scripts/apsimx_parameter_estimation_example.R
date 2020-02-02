@@ -66,8 +66,9 @@ param_info=list(lb=c(.Simulations.Replacements.Wheat.Leaf.ExtinctionCoeff.Vegeta
 optim_options=list()
 optim_options$nb_rep <- 3 # How many times we run the minimization with different parameters
 optim_options$xtol_rel <- 1e-05 # Tolerance criterion between two iterations
-optim_options$maxeval <- 50 # Maximum number of iterations executed by the function
+optim_options$maxeval <- 2 # Maximum number of iterations executed by the function
 optim_options$path_results <- "/home/plecharpent/tmp/tests_SticsOptimizR/estim_example" # path where to store results graphs
+optim_options$path_results <- "D:\\Home\\sbuis\\Documents\\GitHub\\CroptimizR\\tmp"
 
 # Run the optimization
 optim_output=estim_param(obs_list=obs_list,
