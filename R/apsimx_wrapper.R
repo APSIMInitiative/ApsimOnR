@@ -46,7 +46,9 @@ apsimx_wrapper <- function(model_options,
   # Because it may be model dependant, so it could be possible to pass anything
   # useful in the model running function...
   # Reuse next lines before `Run apsimx` block
-  # Check presence of mandatory information in model model_options list
+  #
+  #        find a way to force parameters values that may be different for the
+  # different situations to simulate
 
   apsimx_path <- model_options$apsimx_path
   apsimx_file <- model_options$apsimx_file
@@ -56,12 +58,11 @@ apsimx_wrapper <- function(model_options,
 
   # Default output data list
   nb_paramValues=1
-  situation_names <- "all"
+#  situation_names <- "all"   # no more used for the moment but could be later
   if (base::is.array(param_values)) {
     nb_paramValues=dim(param_values)[1]
-    situation_names <- dimnames(param_values)[[3]]
+#    situation_names <- dimnames(param_values)[[3]] # situations to simulate
   }
-
   res <- list()
   res$error <- FALSE
   res$sim_list <- vector("list",nb_paramValues)
@@ -87,6 +88,11 @@ apsimx_wrapper <- function(model_options,
     stop(paste(apsimx_path,"is not executable or is not a apsimx executable !"))
   }
 
+  if (base::is.array(param_values) &&
+      !all(sapply(1:dim(param_values)[3],function(x) all(param_values[,,x]==param_values[,,1])))) {
+    stop("ApsimX wrapper can not handle different parameters values for the different simulated situations for the moment.")
+  }
+
   start_time <- Sys.time()
 
   # Copy the .apsimx file to a temp file ----------------------------------------
@@ -109,66 +115,58 @@ apsimx_wrapper <- function(model_options,
     file.delete(db_file_name)
   }
 
-  # hum quite ugly for the moment since we repeat the simulation of all simulations
   for(ip in 1:nb_paramValues) {
 
+    # If any parameter value to change
+    if ( ! is.null(param_values) ) {
+      # Generate config file containing parameter changes ---------------------------
 
-    # hum quite ugly for the moment since we repeat the simulation of all situations for each index of the loop
-    # ... this shoud be improved by selecting the situation to run (see APSIM regexp argument)
-    for(situation in situation_names) {
+      if (base::is.array(param_values)) {
+        param_values_tmp=param_values[ip,,1]    # for the moment param values are supposed
+                                                # to be the same for each situations (see check at the beginning)
+        names(param_values_tmp)=colnames(param_values)
 
-      # If any parameter value to change
-      if ( ! is.null(param_values) ) {
-        # Generate config file containing parameter changes ---------------------------
-
-        if (situation=="all") {
-          out <- change_apsimx_param(apsimx_path, file_to_run, param_values)
-        } else {
-          out <- change_apsimx_param(apsimx_path, file_to_run, param_values[ip,,situation])
-        }
-        if (!out) {
-          warning(paste("Error when changing parameters in", file_to_run))
-          res$error=TRUE
-          return(res)
-        }
-
-      }
-
-      # Run apsimx ------------------------------------------------------------------
-      cmd <- paste(apsimx_path, file_to_run)
-      if (model_options$multi_process)  cmd <- paste(cmd, '/MultiProcess')
-
-      # Portable version for system call
-      run_file_stdout <- system(cmd,wait = TRUE, intern = TRUE)
-
-
-      # Getting the execution status
-      res$error  <- !is.null(attr(run_file_stdout,"status"))
-
-      # Preserve .apsimx file in case of error
-      if (res$error) {
-        print(run_file_stdout)
-
-        apsimx_name <- basename(apsimx_file)
-        backupFileName <- gsub('.apsimx', '.error.apsimx', apsimx_name)
-        file.copy(file_to_run, file.path(apsimx_file_dir,backupFileName))
-
-        backup_db_file <- gsub('.apsimx', '.error.db', apsimx_name)
-        file.copy(db_file_name, file.path(apsimx_file_dir,backup_db_file))
-      }
-
-      # Store results ---------------------------------------------------------------
-      results_tmp <- read_apsimx_output(db_file_name,
-                                        model_options$predicted_table_name,
-                                        model_options$variable_names)
-
-      if (situation=="all") {
-        res$sim_list[[ip]]=results_tmp
+        out <- change_apsimx_param(apsimx_path, file_to_run, param_values_tmp)
       } else {
-        res$sim_list[[ip]][[situation]]=results_tmp[[situation]]
+        out <- change_apsimx_param(apsimx_path, file_to_run, param_values)
+      }
+      if (!out) {
+        warning(paste("Error when changing parameters in", file_to_run))
+        res$error=TRUE
+        return(res)
       }
 
     }
+
+    # Run apsimx ------------------------------------------------------------------
+    cmd <- paste(apsimx_path, file_to_run)
+    if (model_options$multi_process)  cmd <- paste(cmd, '/MultiProcess')
+
+    # Portable version for system call
+    run_file_stdout <- system(cmd,wait = TRUE, intern = TRUE)
+
+
+    # Getting the execution status
+    res$error  <- !is.null(attr(run_file_stdout,"status"))
+
+    # Preserve .apsimx file in case of error
+    if (res$error) {
+      print(run_file_stdout)
+
+      apsimx_name <- basename(apsimx_file)
+      backupFileName <- gsub('.apsimx', '.error.apsimx', apsimx_name)
+      file.copy(file_to_run, file.path(apsimx_file_dir,backupFileName))
+
+      backup_db_file <- gsub('.apsimx', '.error.db', apsimx_name)
+      file.copy(db_file_name, file.path(apsimx_file_dir,backup_db_file))
+    }
+
+    # Store results ---------------------------------------------------------------
+    results_tmp <- read_apsimx_output(db_file_name,
+                                      model_options$predicted_table_name,
+                                      model_options$variable_names)
+
+    res$sim_list[[ip]]=results_tmp
 
 
     # filtering on situations mask
