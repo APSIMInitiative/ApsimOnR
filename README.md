@@ -15,7 +15,7 @@ The development version from [GitHub](https://github.com/) can be
 installed with:
 
 ``` r
-devtools::install_github("ApsimOnR")
+devtools::install_github("hol430/ApsimOnR")
 ```
 
 Or using the lightweight
@@ -23,9 +23,9 @@ Or using the lightweight
 
 ``` r
 # install.packages("remotes")
-remotes::install_github("ApsimOnR")
+remotes::install_github("hol430/ApsimOnR")
 ```
 
 ## Example
 
-This is a basic example which shows you how to ...
+TODO
