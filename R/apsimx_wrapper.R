@@ -142,6 +142,14 @@ apsimx_wrapper <- function(model_options,
     cmd <- paste(apsimx_path, file_to_run)
     if (model_options$multi_process)  cmd <- paste(cmd, '/MultiProcess')
 
+    if (!is.null(sit_var_dates_mask)) {
+      # This generates a regular expression of simulation names using alternation
+      # which will be passed to Models.exe to limit execution to the specified
+      # simulation names.
+      regex <- paste('(', paste(names(sit_var_dates_mask), collapse = ')|('), ')', sep = '')
+      cmd <- paste(cmd, ' /SimulationNameRegexPattern:', regex, sep = '')
+    }
+
     # Portable version for system call
     run_file_stdout <- system(cmd,wait = TRUE, intern = TRUE)
 
