@@ -82,6 +82,10 @@ apsimx_wrapper <- function(model_options,
     stop(paste("apsimx file doesn't exist !", apsimx_file))
   }
   cmd <- paste(apsimx_path, '/Version')
+  # On unix systems, need to run via mono.
+  if (.Platform$OS.type == 'unix') {
+    cmd <- paste('mono', cmd)
+  }
   val <- system(cmd, wait = TRUE, intern = TRUE)
 
   if ( !is.null(attr(val, "status"))) {
@@ -140,6 +144,10 @@ apsimx_wrapper <- function(model_options,
 
     # Run apsimx ------------------------------------------------------------------
     cmd <- paste(apsimx_path, file_to_run)
+    # on unix, need to run via mono.
+    if (.Platform$OS.type == 'unix') {
+      cmd <- paste('mono', cmd)
+    }
     if (model_options$multi_process)  cmd <- paste(cmd, '/MultiProcess')
 
     if (!is.null(sit_var_dates_mask)) {
@@ -147,7 +155,12 @@ apsimx_wrapper <- function(model_options,
       # which will be passed to Models.exe to limit execution to the specified
       # simulation names.
       regex <- paste('(', paste(names(sit_var_dates_mask), collapse = ')|('), ')', sep = '')
-      cmd <- paste(cmd, ' /SimulationNameRegexPattern:', regex, sep = '')
+      if (.Platform$OS.type == 'unix') {
+        # on unix, need to escape the regex with quotes
+        cmd <- paste(cmd, " '/SimulationNameRegexPattern:", regex, "'", sep = '')
+      } else {
+        cmd <- paste(cmd, ' /SimulationNameRegexPattern:', regex, sep = '')
+      }
     }
 
     # Portable version for system call
