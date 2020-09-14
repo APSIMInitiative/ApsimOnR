@@ -6,3 +6,6 @@
 *.db-shm
 *.db-wal
 *.apsimx.bak
+packrat/lib*/
+packrat/bundles/
+packrat/src/
