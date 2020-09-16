@@ -1,5 +1,7 @@
 language: r
-os: linux
+os:
+  - linux
+  - osx
 dist: xenial
 env: PKGVER=1.0
 install:
@@ -7,8 +9,9 @@ install:
 - R -e "packrat::restore(restart = FALSE)"
 script:
 - mkdir packrat/bundles
-- R -e "packrat::bundle(file = paste('packrat/bundles/ApsimOnR-', Sys.getenv('PKGVER'),
-  '.', Sys.getenv('TRAVIS_BUILD_NUMBER'), '.tar.gz', sep = ''))"
+- R -e "packrat::bundle(file = 'packrat/bundles/ApsimOnR-$TRAVIS_OS_NAME-bin_$PKGVER.$TRAVIS_BUILD_NUMBER.tar.gz', include.lib = T, omit.cran.src = T, include.src = F, include.bundles = F)"
+- du -sh packrat/bundles/*.tar.gz
+- R CMD build .
 - R CMD check *.tar.gz
 warnings_are_errors: false
 
@@ -16,7 +19,7 @@ deploy:
   provider: releases
   token:
     secure: UZCgp7zTnrgpSxsxPLv3xn9CSDea5QG62jRelyf+WHxmvigjC3FQjgOfoID2oY3Ju2qgJWUWM6ltdSVkTkGGWYdrLbb/a5XMpi+v4ANe7cjDiQmNOEY1oDiLv02H37kh07lQHuIhCCH8utm0+LNHzTPi1SNm2jreY0NbROnz2tSPK9aiSKiNMQufYoDSDFp39mSvY80BtW42IaBRjISX0PC6jtliJ6YqoswDB0xQVbj9U44gf+6wVlv4PBFtdLwRXPuXjTt/sdA8bPi3+2NF/E+vWJvgdCn9gi1yKDMNdhi01WjKmD9NRFJ9KgQXujkQXFSlzbC8tlP5MnfjPvjUSxIygB6qLW+HkqFnvnJ8ynk7Xl8kjhsRcektHfsTzjO4yJzqTF1uyHqMkBBJ3IMSPDyjPznSU/Jg3CXVHbJTZiH98bSWJ4IaEC4rwx6fmxlYyfRclKocxcqnlqbpJuvI0FtH5pTCb11Yf5i2ZrZx+TGeAhFxkXhEFZFqsAZ+6Wy9FvySQeav/c6gMPdXT7XfKDkwtcj6diNPJkhlFd2WmwUHQJBOcyCoHR5j/WkBjx0pBVS4Xyh8e9uPDNcSSf/KtT88xpWoMW2rayObPzsFHS4xxFMcutfD8lp3GvwOMFZUXk5wKyJx5A1qk+MjhDpceUgdtPPfjoBJveF0mDOrhxY=
-  file: packrat/bundles/ApsimOnR-$PKGVER.$TRAVIS_BUILD_NUMBER.tar.gz
+  file: packrat/bundles/ApsimOnR-$TRAVIS_OS_NAME-bin_$PKGVER.$TRAVIS_BUILD_NUMBER.tar.gz
   on:
     repo: hol430/ApsimOnR
     tags: true
