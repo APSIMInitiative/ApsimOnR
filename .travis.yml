@@ -1,30 +1,29 @@
-language: shell
-os:
-  # - linux
-  # - osx
-  - windows
-dist: xenial
-services:
-  - docker
-    #if: os = windows
+language: r
 env: PKGVER=1.0
-install:
-  - docker version
-  - cd .travis/
-  - docker build -t apsimonr .
-  - cd ..
-  - cmd //c docker run --rm -e TRAVIS_OS_NAME -e PKGVER -e TRAVIS_BUILD_NUMBER -v %cd%:C:\\apsimonr apsimonr 
-
-    #R -e "packrat::bundle(file = 'packrat/bundles/ApsimOnR-$TRAVIS_OS_NAME-bin_$PKGVER.$TRAVIS_BUILD_NUMBER.tar.gz', include.lib = T, omit.cran.src = T, include.src = F, include.bundles = F)"
-    #- R -e "0" --args --bootstrap-packrat
-    #- R -e "packrat::restore(restart = FALSE)"
-script:
-  #  - mkdir packrat/bundles
-  #  - R -e "packrat::bundle(file = 'packrat/bundles/ApsimOnR-$TRAVIS_OS_NAME-bin_$PKGVER.$TRAVIS_BUILD_NUMBER.tar.gz', include.lib = T, omit.cran.src = T, include.src = F, include.bundles = F)"
-  - du -sh packrat/bundles/*.tar.gz
-  #  - R CMD build .
-  #  - R CMD check *.tar.gz
 warnings_are_errors: false
+jobs:
+  include:
+    - os: linux
+      dist: xenial
+    - os: osx
+    - os: windows
+      language: shell
+      services:
+        - docker
+      script:
+        - docker version
+        - pushd .travis
+        - docker build -t apsimonr .
+        - popd
+        - cmd //c docker run --rm -e TRAVIS_OS_NAME -e PKGVER -e TRAVIS_BUILD_NUMBER -v %cd%:C:\\apsimonr apsimonr 
+script:
+  - R -e "packrat::bundle(file = 'packrat/bundles/ApsimOnR-$TRAVIS_OS_NAME-bin_$PKGVER.$TRAVIS_BUILD_NUMBER.tar.gz', include.lib = T, omit.cran.src = T, include.src = F, include.bundles = F)"
+  - R -e "0" --args --bootstrap-packrat
+  - R -e "packrat::restore(restart = FALSE)"
+  - R CMD build .
+  - mkdir packrat/bundles
+  - R -e "packrat::bundle(file = 'packrat/bundles/ApsimOnR-$TRAVIS_OS_NAME-bin_$PKGVER.$TRAVIS_BUILD_NUMBER.tar.gz', include.lib = T, omit.cran.src = T, include.src = F, include.bundles = F)"
+  - du -sh packrat/bundles/*.tar.gz
 
 deploy:
   provider: releases
