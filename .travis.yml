@@ -18,7 +18,6 @@ jobs:
         # need to work around msys path conversion (https://github.com/docker/toolbox/issues/673)
         - cmd //c docker run --rm -e TRAVIS_OS_NAME -e PKGVER -e TRAVIS_BUILD_NUMBER -v %cd%:C:\\apsimonr apsimonr 
 script:
-  - R -e "packrat::bundle(file = 'packrat/bundles/ApsimOnR-$TRAVIS_OS_NAME-bin_$PKGVER.$TRAVIS_BUILD_NUMBER.tar.gz', include.lib = T, omit.cran.src = T, include.src = F, include.bundles = F)"
   - R -e "0" --args --bootstrap-packrat
   - R -e "packrat::restore(restart = FALSE)"
   - R CMD build .
