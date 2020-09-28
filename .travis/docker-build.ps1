@@ -19,6 +19,6 @@ if (!$?) { exit 1 }
 
 mkdir packrat/bundles
 echo Creating packrat bundle
-R -e "packrat::bundle(file = 'packrat/bundles/ApsimOnR-$env:TRAVIS_OS_NAME-bin_$env:PKGVER.$env:TRAVIS_BUILD_NUMBER.tar.gz', include.lib = T, omit.cran.src = T, include.src = F, include.bundles = F)"
+R -e "packrat::bundle(file = 'packrat/bundles/ApsimOnR-$env:TRAVIS_OS_NAME-bin_$env:PKGVER.$env:TRAVIS_BUILD_NUMBER.tar.gz', include.lib = T, include.bundles = F)"
 if (!$?) { exit 1 }
 

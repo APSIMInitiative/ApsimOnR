@@ -22,7 +22,7 @@ script:
   - R -e "packrat::restore(restart = FALSE)"
   - R CMD build .
   - mkdir packrat/bundles
-  - R -e "packrat::bundle(file = 'packrat/bundles/ApsimOnR-$TRAVIS_OS_NAME-bin_$PKGVER.$TRAVIS_BUILD_NUMBER.tar.gz', include.lib = T, omit.cran.src = T, include.src = F, include.bundles = F)"
+  - R -e "packrat::bundle(file = 'packrat/bundles/ApsimOnR-$TRAVIS_OS_NAME-bin_$PKGVER.$TRAVIS_BUILD_NUMBER.tar.gz', include.lib = T, include.bundles = F)"
 
 deploy:
   provider: releases
