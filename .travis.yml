@@ -31,6 +31,7 @@ deploy:
   file: packrat/bundles/ApsimOnR-$TRAVIS_OS_NAME-bin_$PKGVER.$TRAVIS_BUILD_NUMBER.tar.gz
   on:
     repo: hol430/ApsimOnR
-    tags: true
+    all_branches: true
+      #tags: true
   skip_cleanup: true
   draft: true
