@@ -61,7 +61,11 @@ apsimx_wrapper_options <- function(apsimx_path,
 
   # Adding dates variable for getting them in outputs
   if ( ! is.element("Clock.Today", options$variable_names ) ) {
-    options$variable_names <- c(options$variable_names, "Clock.Today")
+    if (length(options$variable_names) > 0 && grepl('Predicted.', options$variable_names[1])) {
+      options$variable_names <- c(options$variable_names, "Predicted.Clock.Today")
+    } else {
+      options$variable_names <- c(options$variable_names, "Clock.Today")
+    }
   }
 
   return(options)
