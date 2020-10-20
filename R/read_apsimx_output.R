@@ -15,7 +15,6 @@ read_apsimx_output <- function(dbFileName, tableName, variables, sim_names=NULL)
   sql <- paste0('SELECT ', vars, ' FROM ', tableName, ', _Simulations WHERE _Simulations.ID = ', tableName, '.SimulationID')
   data <- DBI::dbGetQuery(con, sql)
   DBI::dbDisconnect(con)
-
   simulationNames <- unique(data$SimulationName)
 
   # Selecting simulations
@@ -37,6 +36,9 @@ read_apsimx_output <- function(dbFileName, tableName, variables, sim_names=NULL)
         select(-Clock.Today)
     } else if ("Date" %in% names(tables[[i]])) {
       tables[[i]] <- mutate(tables[[i]],Date=as.Date(Date))
+    } else if ("Predicted.Clock.Today" %in% names(tables[[i]])) {
+      tables[[i]] <- mutate(tables[[i]],Date=as.Date(Predicted.Clock.Today)) %>%
+        select(-Predicted.Clock.Today)
     }
   }
 
