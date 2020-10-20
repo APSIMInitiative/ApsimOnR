@@ -16,7 +16,7 @@ simulation_name <- "GattonRowSpacingRowSpace25cm"
 variable_names=c("Wheat.Leaf.LAI")
 
 # Getting apsimx file fro the package
-apsimx_path="/home/drew/code/ApsimX/Bin/Models.exe"
+apsimx_path="/usr/local/bin/Models"
 files_path <- system.file(file.path("extdata","apsimx_files"),package = "ApsimOnR")
 apsimx_file <- file.path(files_path, "template.apsimx")
 
