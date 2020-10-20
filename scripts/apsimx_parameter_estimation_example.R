@@ -16,7 +16,7 @@ simulation_name <- "GattonRowSpacingRowSpace25cm"
 variable_names=c("Wheat.Leaf.LAI")
 
 # Getting apsimx file fro the package
-apsimx_path="/usr/local/bin/Models"
+apsimx_path="/home/drew/code/ApsimX/Bin/Models.exe"
 files_path <- system.file(file.path("extdata","apsimx_files"),package = "ApsimOnR")
 apsimx_file <- file.path(files_path, "template.apsimx")
 
@@ -67,8 +67,8 @@ optim_options=list()
 optim_options$nb_rep <- 3 # How many times we run the minimization with different parameters
 optim_options$xtol_rel <- 1e-05 # Tolerance criterion between two iterations
 optim_options$maxeval <- 2 # Maximum number of iterations executed by the function
-optim_options$path_results <- "/home/plecharpent/tmp/tests_SticsOptimizR/estim_example" # path where to store results graphs
-optim_options$path_results <- "D:\\Home\\sbuis\\Documents\\GitHub\\CroptimizR\\tmp"
+#optim_options$path_results <- "/home/plecharpent/tmp/tests_SticsOptimizR/estim_example" # path where to store results graphs
+optim_options$path_results <- "/home/drew/code/ApsimOnR/output"
 
 # Run the optimization
 optim_output=estim_param(obs_list=obs_list,
@@ -91,10 +91,10 @@ dev.new()
 par(mfrow = c(1,2))
 Ymax=max(max(obs_list[[simulation_name]][,var_name], na.rm=TRUE),
          max(sim_before_optim$sim_list[[simulation_name]][,var_name], na.rm=TRUE))
-plot(sim_before_optim$sim_list[[1]][[simulation_name]][,c("Date",var_name)],type="l",
+plot(sim_before_optim$sim_list[[simulation_name]][,c("Date",var_name)],type="l",
      main="Before optimization",ylim=c(0,Ymax+Ymax*0.1))
 points(obs_list[[simulation_name]]$Date,obs_list[[simulation_name]][[var_name]],col="red")
-plot(sim_after_optim$sim_list[[1]][[simulation_name]][,c("Date",var_name)],type="l",
+plot(sim_after_optim$sim_list[[simulation_name]][,c("Date",var_name)],type="l",
      main="After optimization",ylim=c(0,Ymax+Ymax*0.1))
 points(obs_list[[simulation_name]]$Date,obs_list[[simulation_name]][[var_name]],col="red")
 

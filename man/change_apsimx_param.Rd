@@ -16,5 +16,5 @@ TRUE if changes are successful, FALSE otherwise
 }
 \description{
 This function apply parameters values changes in an . apsimx
-using a paarameters named vector of values
+using a paarameters named vector of values.
 }

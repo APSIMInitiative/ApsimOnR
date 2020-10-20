@@ -5,39 +5,37 @@
 \title{Running .apsimx files from txt input files stored in one directory
 per `situation`, simulated results are returned in a list}
 \usage{
-apsimx_wrapper(
-  param_values = NULL,
-  sit_var_dates_mask = NULL,
-  prior_information = NULL,
-  model_options
-)
+apsimx_wrapper(model_options, param_values = NULL, sit_var_dates_mask = NULL)
 }
 \arguments{
-\item{param_values}{named vector containing the value(s) and names of the
-parameters to force (optional)}
-
-\item{sit_var_dates_mask}{List of situations, variables and dates for which
-simulated values should be returned. Typically a list containing the
-observations to which simulations should be compared as provided by
-apsimxRFiles::read_obs_to_list}
-
-\item{prior_information}{Prior information on the parameters to estimate.
-For the moment only uniform distribution are allowed.
-Either a list containing (named) vectors of upper and lower
-bounds (\code{ub} and \code{lb}), or a named list containing for each
-parameter the list of situations per group (\code{sit_list})
-and the vector of upper and lower bounds (one value per group) (\code{ub} and \code{lb})}
-
 \item{model_options}{List containing any information needed by the model.
 In the case of apsimx: \code{apsimx_path} the path of apsimx executable file and
 \code{apsimx_file} the path of the directory containing the apsimx input data
-for each USM (one folder per USM where apsimx input files are stored in txt
-format)}
+for each situation to simulate}
+
+\item{param_values}{(optional) either a named vector or a named 3D array.
+Use a named vector that contains the values and names of the parameters
+to force the same values of the parameters whatever the simulated
+situations (usms). If one wants to force the model with different values
+of parameters for the simulated situations or to simulate the situations
+several times but with different values of the parameters, use a 3D array
+containing the value(s) and names of the parameters to force for each
+situation to simulate. This array contains the different parameters
+values (first dimension) for the different parameters (second dimension)
+and for the different situations (third dimension).
+See examples for more details.}
+
+\item{sit_var_dates_mask}{(optional) List of situations:
+may be either a character vector of situation names or a named list
+containing information about variables and dates for which simulated values
+should be returned. Typically a list containing the observations to which
+simulations should be compared as provided by apsimxRFiles::read_obs_to_list}
 }
 \value{
-A list containing simulated values (\code{sim_list}) and a flag
-(\code{flag_allsim}) indicating if all required situations, variables and
-dates were simulated.
+A list containing simulated values (`sim_list`: a vector of list (one
+element per values of parameters) containing usms outputs data.frames) and an
+error code (`error`) indicating if at least one simulation ended with an
+error.
 }
 \description{
 This function uses ApsimX directly through a system call, can

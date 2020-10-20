@@ -10,17 +10,12 @@
 #' \code{apsimx_file} the path of the directory containing the apsimx input data
 #' for each situation to simulate
 #'
-#' @param param_values (optional) either a named vector or a named 3D array.
-#' Use a named vector that contains the values and names of the parameters
-#' to force the same values of the parameters whatever the simulated
-#' situations (usms). If one wants to force the model with different values
-#' of parameters for the simulated situations or to simulate the situations
-#' several times but with different values of the parameters, use a 3D array
-#' containing the value(s) and names of the parameters to force for each
-#' situation to simulate. This array contains the different parameters
-#' values (first dimension) for the different parameters (second dimension)
-#' and for the different situations (third dimension).
-#' See examples for more details.
+#' @param sit_names Vector of situations names for which results must be returned.
+#'
+#' @param param_values (optional) a named vector that contains the value(s) and name(s)
+#' of the parameters to force for each situation to simulate. If not provided (or if is
+#' NULL), the simulations will be performed using default values of the parameters
+#' (e.g. as read in the model input files).
 #'
 #' @param sit_var_dates_mask (optional) List of situations:
 #' may be either a character vector of situation names or a named list
@@ -39,8 +34,10 @@
 #' @export
 #'
 apsimx_wrapper <- function(model_options,
+                           sit_names=NULL,
                            param_values = NULL,
-                           sit_var_dates_mask = NULL) {
+                           sit_var_dates_mask = NULL,
+                           ...) {
 
   # TODO : make a function dedicated to checking model_options
   # Because it may be model dependant, so it could be possible to pass anything
@@ -65,7 +62,7 @@ apsimx_wrapper <- function(model_options,
   }
   res <- list()
   res$error <- FALSE
-  res$sim_list <- vector("list",nb_paramValues)
+  res$sim_list <- list()
 
 
   # Preliminary model checks ---------------------------------------------------
@@ -150,7 +147,16 @@ apsimx_wrapper <- function(model_options,
     }
     if (model_options$multi_process)  cmd <- paste(cmd, '/MultiProcess')
 
-    if (!is.null(sit_var_dates_mask)) {
+    if (!is.null(sit_names)) {
+      regex <- paste('(', paste(sit_names, collapse = ')|('), ')', sep = '')
+      if (.Platform$OS.type == 'unix') {
+        # on unix, need to escape the regex with quotes
+        cmd <- paste(cmd, " '/SimulationNameRegexPattern:", regex, "'", sep = '')
+      } else {
+        cmd <- paste(cmd, ' /SimulationNameRegexPattern:', regex, sep = '')
+      }
+    }
+    else if (!is.null(sit_var_dates_mask)) {
       # This generates a regular expression of simulation names using alternation
       # which will be passed to Models.exe to limit execution to the specified
       # simulation names.
@@ -165,7 +171,6 @@ apsimx_wrapper <- function(model_options,
 
     # Portable version for system call
     run_file_stdout <- system(cmd,wait = TRUE, intern = TRUE)
-
 
     # Getting the execution status
     res$error  <- !is.null(attr(run_file_stdout,"status"))
@@ -186,21 +191,23 @@ apsimx_wrapper <- function(model_options,
     results_tmp <- read_apsimx_output(db_file_name,
                                       model_options$predicted_table_name,
                                       model_options$variable_names)
-
-    res$sim_list[[ip]]=results_tmp
-
+    # We don't need to filter the results based on sit_names;
+    # The only simulations which were run are those specified by sit_names.
+    res$sim_list <- results_tmp
 
     # filtering on situations mask
-    # browser()
+    # We don't need to filter on sit_names, because only the relevant simulations
+    # were run in the first place, so the outputs/predictions shouldn't contain
+    # any simulations which aren't in sit_names.
     if (! is.null(sit_var_dates_mask) ) {
       situation_names_red <- names(sit_var_dates_mask)
-      res$sim_list[[ip]] <- res$sim_list[[ip]][situation_names_red]
+      res$sim_list <- res$sim_list[situation_names_red]
       vars_list <- lapply(sit_var_dates_mask, colnames)
       dates_list <- lapply(sit_var_dates_mask, function(x) x$Date)
 
       for (i in 1:length(situation_names_red)) {
         sit_name <- situation_names_red[i]
-        res$sim_list[[ip]][[sit_name]] <- select(res$sim_list[[ip]][[sit_name]],vars_list[[i]]) %>%
+        res$sim_list[[sit_name]] <- select(res$sim_list[[sit_name]],vars_list[[i]]) %>%
           filter(Date %in% dates_list[[i]])
 
       }
