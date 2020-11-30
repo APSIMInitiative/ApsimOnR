@@ -127,20 +127,24 @@ apsimx_wrapper <- function(model_options,
                                                 # to be the same for each situations (see check at the beginning)
         names(param_values_tmp)=colnames(param_values)
 
-        out <- change_apsimx_param(apsimx_path, file_to_run, param_values_tmp)
+        config_file <- generate_config_file(param_values_tmp)
       } else {
-        out <- change_apsimx_param(apsimx_path, file_to_run, param_values)
+        config_file <- generate_config_file(param_values)
       }
-      if (!out) {
-        warning(paste("Error when changing parameters in", file_to_run))
-        res$error=TRUE
-        return(res)
-      }
+      #if (!out) {
+      #  warning(paste("Error when changing parameters in", file_to_run))
+      #  res$error=TRUE
+      #  return(res)
+      #}
 
     }
 
     # Run apsimx ------------------------------------------------------------------
     cmd <- paste(apsimx_path, file_to_run)
+    if (!is.null(param_values)) {
+      cmd <- paste(cmd, '/Edit', config_file)
+    }
+
     # on unix, need to run via mono.
     if (.Platform$OS.type == 'unix') {
       cmd <- paste('mono', cmd)
