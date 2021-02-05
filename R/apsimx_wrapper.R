@@ -227,6 +227,10 @@ apsimx_wrapper <- function(model_options,
   }
 
 
+  if (length(res$sim_list)>0) {
+	# Add the attribute cropr_simulation for using CroPlotR package
+	attr(res$sim_list, "class")= "cropr_simulation"
+  }
   res$db_file_name = db_file_name
   return(res)
 
