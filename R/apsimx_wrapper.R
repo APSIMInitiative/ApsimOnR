@@ -146,7 +146,9 @@ apsimx_wrapper <- function(model_options,
     }
 
     # on unix, need to run via mono.
-    if (.Platform$OS.type == 'unix') {
+    if (endsWith(apsimx_path, '.dll')) {
+      cmd <- paste('dotnet', cmd)
+    } else if (.Platform$OS.type == 'unix') {
       cmd <- paste('mono', cmd)
     }
     if (model_options$multi_process)  cmd <- paste(cmd, '/MultiProcess')
