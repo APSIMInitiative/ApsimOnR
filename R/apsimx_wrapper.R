@@ -80,7 +80,9 @@ apsimx_wrapper <- function(model_options,
   }
   cmd <- paste(apsimx_path, '/Version')
   # On unix systems, need to run via mono.
-  if (.Platform$OS.type == 'unix') {
+  if (endsWith(apsimx_path, '.dll')) {
+    cmd <- paste('dotnet', cmd)
+  } else if (.Platform$OS.type == 'unix') {
     cmd <- paste('mono', cmd)
   }
   val <- system(cmd, wait = TRUE, intern = TRUE)
