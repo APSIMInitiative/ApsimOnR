@@ -79,11 +79,8 @@ apsimx_wrapper <- function(model_options,
     stop(paste("apsimx file doesn't exist !", apsimx_file))
   }
   cmd <- paste(apsimx_path, '/Version')
-  # On unix systems, need to run via mono.
   if (endsWith(apsimx_path, '.dll')) {
     cmd <- paste('dotnet', cmd)
-  } else if (.Platform$OS.type == 'unix') {
-    cmd <- paste('mono', cmd)
   }
   val <- system(cmd, wait = TRUE, intern = TRUE)
 
@@ -147,11 +144,8 @@ apsimx_wrapper <- function(model_options,
       cmd <- paste(cmd, '/Edit', config_file)
     }
 
-    # on unix, need to run via mono.
     if (endsWith(apsimx_path, '.dll')) {
       cmd <- paste('dotnet', cmd)
-    } else if (.Platform$OS.type == 'unix') {
-      cmd <- paste('mono', cmd)
     }
     if (model_options$multi_process)  cmd <- paste(cmd, '/MultiProcess')
 
