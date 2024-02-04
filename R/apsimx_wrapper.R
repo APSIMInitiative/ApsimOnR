@@ -78,7 +78,7 @@ apsimx_wrapper <- function(model_options,
   if (!file.exists(apsimx_file)) {
     stop(paste("apsimx file doesn't exist !", apsimx_file))
   }
-  cmd <- paste(apsimx_path, '/Version')
+  cmd <- paste("\"", apsimx_path, '" /Version', sep='')
   if (endsWith(apsimx_path, '.dll')) {
     cmd <- paste('dotnet', cmd)
   }
@@ -139,7 +139,8 @@ apsimx_wrapper <- function(model_options,
     }
 
     # Run apsimx ------------------------------------------------------------------
-    cmd <- paste(apsimx_path, file_to_run)
+    cmd <- paste('"', apsimx_path, '" "', file_to_run, '"', sep='')
+
     if (!is.null(param_values)) {
       cmd <- paste(cmd, '/Edit', config_file)
     }
